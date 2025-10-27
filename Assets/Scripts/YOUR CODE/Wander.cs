@@ -3,18 +3,12 @@ using UnityEngine;
 public class Wander : SteeringBehaviour
 {
     private float maxNewSteeringAngleDelta = 5f;
-    private float currentSteeringAngle = 0f;
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
-        //get random angle between the max and min delta
-        float offset = UnityEngine.Random.Range(-maxNewSteeringAngleDelta, maxNewSteeringAngleDelta);
+        Quaternion newRotation = Quaternion.Euler(transform.rotation.x, transform.rotation.y, transform.rotation.z + GetOffsetForSteering());
 
-        currentSteeringAngle += offset;
-
-        Quaternion newRotation = Quaternion.Euler(0f, currentSteeringAngle, 0f);
-
-        Vector3 desiredDirection = newRotation * transform.forward;
+        Vector3 desiredDirection = newRotation * transform.up;
 
         Vector3 targetPoint = transform.position + (Vector3.Normalize(desiredDirection) * 5f);
 
@@ -24,9 +18,45 @@ public class Wander : SteeringBehaviour
         // Calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
 
-        steeringVelocity.y = steeringVelocity.z;
-        steeringVelocity.z = 0f;
-
         return steeringVelocity;
     }
+
+
+    private float GetOffsetForSteering()
+    {
+        Vector3 desiredDirection = transform.rotation * transform.up;
+        Vector3 posInFront = transform.position + (Vector3.Normalize(desiredDirection));
+
+        if (posInFront.x >= 100 || posInFront.x < 0 || posInFront.y >= 100 || posInFront.y < 0)
+        {
+            return 180f;
+        }
+
+
+        if (GameData.Instance.Map.GetTerrainAt((int)posInFront.x, (int)posInFront.y) != Map.Terrain.Grass 
+            && GameData.Instance.Map.GetTerrainAt((int)transform.position.x, (int)transform.position.y) == Map.Terrain.Grass)
+        {
+            desiredDirection = transform.rotation * -transform.right;
+            Vector3 posToLeft = transform.position + (Vector3.Normalize(desiredDirection));
+            
+            desiredDirection = transform.rotation * transform.right;
+            Vector3 posToRight = transform.position + (Vector3.Normalize(desiredDirection));
+
+            bool isWallLeft = GameData.Instance.Map.GetTerrainAt((int)posToLeft.x, (int)posToLeft.y) != Map.Terrain.Grass;
+            bool isWallRight = GameData.Instance.Map.GetTerrainAt((int)posToRight.x, (int)posToRight.y) != Map.Terrain.Grass;
+
+            if (isWallLeft && !isWallRight)
+            {
+                return 135f;
+            }
+            else
+            {
+                return -135f;
+            }
+        }
+
+
+        return Random.Range(-maxNewSteeringAngleDelta, maxNewSteeringAngleDelta);
+    }
+
 }

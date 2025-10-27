@@ -4,10 +4,11 @@ public class AllyAgent : SteeringAgent
 {
 	private Attack.AttackType attackType = Attack.AttackType.AllyGun;
 
+	private AllyAgentRole agentRole = AllyAgentRole.Default;
+
 	protected override void InitialiseFromAwake()
 	{
-		gameObject.AddComponent<Wander>();
-		GetComponent<Wander>().enabled = true;
+
 	}
 
 	protected override void CooperativeArbitration()
@@ -39,15 +40,26 @@ public class AllyAgent : SteeringAgent
 
 	protected override void UpdateDirection()
 	{
-		if (GetComponent<Wander>().enabled)
+		switch(agentRole)
 		{
-			base.UpdateDirection();
-		}
-		else
-		{
-			var mouseInWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-			mouseInWorld.z = 0.0f;
-			transform.up = Vector3.Normalize(mouseInWorld - transform.position);
+			case AllyAgentRole.Default:
+                var mouseInWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                mouseInWorld.z = 0.0f;
+                transform.up = Vector3.Normalize(mouseInWorld - transform.position);
+                break;
+			case AllyAgentRole.Scout:
+                if (GetComponent<Wander>().enabled)
+                {
+                    base.UpdateDirection();
+                }
+                break;
 		}
 	}
+
+
+	public void SetAgentRole(AllyAgentRole role)
+	{
+		agentRole = role;
+	}
+
 }
