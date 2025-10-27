@@ -9,10 +9,10 @@ public class TestingVariables : MonoBehaviour
 	public const int LocationsSeed = -1;
 
 	/// <summary>If < 0 then normal amount of enemies are produced. If >= 0 then the specific amount of enemeies are created up to the allowed normal amount</summary>
-	public const int MaxEnemies = -1;
+	public const int MaxEnemies = 0;
 
 	/// <summary>If < 0 then normal amount of allies are produced. If >= 0 then the specific amount of allies are created up to the allowed normal amount</summary>
-	public const int MaxAllies = -1;
+	public const int MaxAllies = 1;
 
 
 	/// Please only change the colours if you have difficulty seeing the distinction between the default colours

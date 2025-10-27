@@ -6,7 +6,8 @@ public class AllyAgent : SteeringAgent
 
 	protected override void InitialiseFromAwake()
 	{
-		gameObject.AddComponent<SeekToMouse>();
+		gameObject.AddComponent<Wander>();
+		GetComponent<Wander>().enabled = true;
 	}
 
 	protected override void CooperativeArbitration()
@@ -34,18 +35,11 @@ public class AllyAgent : SteeringAgent
 
 			AttackWith(attackType);
 		}
-		if(Input.GetMouseButtonDown(1))
-		{
-			SteeringVelocity = Vector3.zero;
-			CurrentVelocity = Vector3.zero;
-			var seekToMouse = GetComponent<SeekToMouse>();
-			seekToMouse.enabled = !seekToMouse.enabled;
-		}
 	}
 
 	protected override void UpdateDirection()
 	{
-		if (GetComponent<SeekToMouse>().enabled)
+		if (GetComponent<Wander>().enabled)
 		{
 			base.UpdateDirection();
 		}
