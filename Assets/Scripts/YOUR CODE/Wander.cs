@@ -24,38 +24,49 @@ public class Wander : SteeringBehaviour
 
     private float GetOffsetForSteering()
     {
-        Vector3 desiredDirection = transform.rotation * transform.up;
-        Vector3 posInFront = transform.position + (Vector3.Normalize(desiredDirection));
+        Vector3 posInFront = transform.position + transform.up;
 
         if (posInFront.x >= 100 || posInFront.x < 0 || posInFront.y >= 100 || posInFront.y < 0)
         {
             return 180f;
         }
 
+        Node currentPosNode = GridData.Instance.GetNodeAt((int)transform.position.x, (int)transform.position.y);
+        Node posInFrontNode = GridData.Instance.GetNodeAt((int)posInFront.x, (int)posInFront.y);
 
-        if (GameData.Instance.Map.GetTerrainAt((int)posInFront.x, (int)posInFront.y) != Map.Terrain.Grass 
-            && GameData.Instance.Map.GetTerrainAt((int)transform.position.x, (int)transform.position.y) == Map.Terrain.Grass)
+        if(posInFrontNode.terrain == Map.Terrain.Tree)
         {
-            desiredDirection = transform.rotation * -transform.right;
-            Vector3 posToLeft = transform.position + (Vector3.Normalize(desiredDirection));
-            
-            desiredDirection = transform.rotation * transform.right;
-            Vector3 posToRight = transform.position + (Vector3.Normalize(desiredDirection));
 
-            bool isWallLeft = GameData.Instance.Map.GetTerrainAt((int)posToLeft.x, (int)posToLeft.y) != Map.Terrain.Grass;
-            bool isWallRight = GameData.Instance.Map.GetTerrainAt((int)posToRight.x, (int)posToRight.y) != Map.Terrain.Grass;
+            //currently not work because it doesnt know which way the player is facing
+            //probably do something with the neighbours of current position
+            Node posInToRight = GridData.Instance.GetNodeAt((int)posInFront.x + 1, (int)posInFront.y);
+            Node posInToLeft = GridData.Instance.GetNodeAt((int)posInFront.x - 1, (int)posInFront.y);
 
-            if (isWallLeft && !isWallRight)
+            bool canGoRight = true;
+            bool canGoLeft = true;
+
+            if (posInToRight.terrain == Map.Terrain.Tree)
             {
-                return 135f;
+                canGoRight = false;
             }
-            else
+            if (posInToLeft.terrain == Map.Terrain.Tree)
             {
-                return -135f;
+                canGoLeft = false;
+            }
+
+            if (!canGoLeft && !canGoRight)
+            {
+                return 180f;
+            }
+            else if (canGoRight && !canGoLeft)
+            {
+                return 90f;
+            }
+            else if (canGoLeft)
+            {
+                return -90f;
             }
         }
-
-
         return Random.Range(-maxNewSteeringAngleDelta, maxNewSteeringAngleDelta);
     }
 
