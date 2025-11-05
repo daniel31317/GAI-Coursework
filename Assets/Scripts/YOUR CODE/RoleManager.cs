@@ -62,8 +62,7 @@ public class RoleManager : MonoBehaviour
 
             foreach (Node childNode in currentNode.neighbours)
             {
-                //check if it has 8 neighbours as well since I dont want to check tiles next to tree walls and borders
-                if (!childNode.onClosedList && childNode.neighbours.Count == 8)
+                if (!childNode.onClosedList)
                 {
                     int f = currentNode.f + CalculateInitialCost(currentNode.position, childNode.position);
                     if (f <= childNode.f || !childNode.onOpenList)
@@ -80,6 +79,25 @@ public class RoleManager : MonoBehaviour
             }
         }
 
+        for(int i = 0; i < closedNodeList.Count;)
+        {
+            if (closedNodeList[i].neighbours.Count != 8)
+            {
+                closedNodeList.RemoveAt(i); 
+            }
+            else
+            {
+                i++;
+            }
+        }
+
+
+
+
+
+
+
+
 
         //sort closed list
         for (int i = 0; i < closedNodeList.Count - 1; i++)
@@ -93,13 +111,6 @@ public class RoleManager : MonoBehaviour
                     closedNodeList[j + 1] = temp;
                 }
             }
-        }
-
-
-        //testing loop closedNodeList[i].position.x == 1 && closedNodeList[i].position.y == 1
-        for (int i = 0; i < closedNodeList.Count; i++)
-        {
-            int x = 5;
         }
 
 
@@ -149,9 +160,16 @@ public class RoleManager : MonoBehaviour
 
     public bool IsNodeInRange(Node originNode, Node otherNode)
     {
-        Vector2 posDiff = originNode.position - otherNode.position;
+        int distanceLimit = 15;
 
-        if(Mathf.Abs(posDiff.x * posDiff.x) + Mathf.Abs(posDiff.y + posDiff.y) <= 144)
+        Vector2 posDiff = originNode.position - otherNode.position;
+        if (posDiff.sqrMagnitude <= distanceLimit * distanceLimit)
+        {
+            return true;
+        }
+        return false;
+
+        if (Mathf.Abs(posDiff.x) <= distanceLimit && Mathf.Abs(posDiff.y) <= distanceLimit)
         {
             return true;
         }
