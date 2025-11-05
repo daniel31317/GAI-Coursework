@@ -37,13 +37,23 @@ public class GridData : MonoBehaviour
                 InitialiseGridNode(Data[i, j], i, j);
             }
         }
+        
+        
+        for(int i = 0; i < Data.GetLength(0); i++)
+        {
+            for(int j = 0; j < Data.GetLength(1); j++)
+            {
+                Data[i, j].SetNeighbours(GetNeighboursOfNode(i, j));
+            }
+        }
+
+        RoleManager.Instance.AssignRoles();
     }
 
     private void InitialiseGridNode(Node node, int x, int y)
     {
         node.SetPosition(new Vector2(x, y));
         node.SetTerrain(GameData.Instance.Map.GetTerrainAt(x, y));
-        node.SetNeighbours(GetNeighboursOfNode(x, y));
     }
 
     private List<Node> GetNeighboursOfNode(int x, int y)
@@ -85,6 +95,11 @@ public class GridData : MonoBehaviour
         
         
         if(j + y < 0 || j + y > 99)
+        {
+            return true;
+        }
+
+        if (Data[x +  i, y + j].terrain == Map.Terrain.Tree)
         {
             return true;
         }

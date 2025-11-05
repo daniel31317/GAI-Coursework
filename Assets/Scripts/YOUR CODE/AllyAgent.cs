@@ -8,10 +8,11 @@ public class AllyAgent : SteeringAgent
 
 	protected override void InitialiseFromAwake()
 	{
-
+		
 	}
 
-	protected override void CooperativeArbitration()
+
+    protected override void CooperativeArbitration()
 	{
 		base.CooperativeArbitration();
 

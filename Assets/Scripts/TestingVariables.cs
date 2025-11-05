@@ -3,7 +3,7 @@ using UnityEngine;
 public class TestingVariables : MonoBehaviour
 {
 	/// <summary>If >= 0 then the specified seed will be used for terrain generation rather than the normal algorithms</summary>
-	public const int TerrainSeed = 6;
+	public const int TerrainSeed = 10;
 
 	/// <summary>If >= 0 then the specified seed will be used for unit locations rather than the normal algorithms</summary>
 	public const int LocationsSeed = -1;

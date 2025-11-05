@@ -10,6 +10,13 @@ public class Node
     public List<Node> neighbours { get; private set; }
     public Node parent { get; private set; }
 
+    public bool onOpenList = false;
+    public bool onClosedList = false;
+
+    public int f;
+    public int g;
+    public int h;
+
     public void SetPosition(Vector2 position)
     {
         this.position = position;
@@ -35,5 +42,6 @@ public class Node
         this.parent = parent;
     }
 
+    
 
 }
