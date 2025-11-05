@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Wander : SteeringBehaviour
@@ -24,48 +26,50 @@ public class Wander : SteeringBehaviour
 
     private float GetOffsetForSteering()
     {
-        Vector3 posInFront = transform.position + transform.up;
+        Vector3 posInFront = transform.position + (transform.up * 2);
+
+        DebugDrawCircle("Yippee", posInFront, 0.5f, Color.yellow);
+
+        bool skipTerrainCheck = false;
 
         if (posInFront.x >= 100 || posInFront.x < 0 || posInFront.y >= 100 || posInFront.y < 0)
         {
-            return 180f;
+            skipTerrainCheck = true;
         }
 
         Node currentPosNode = GridData.Instance.GetNodeAt((int)transform.position.x, (int)transform.position.y);
-        Node posInFrontNode = GridData.Instance.GetNodeAt((int)posInFront.x, (int)posInFront.y);
+        Node posInFrontNode = new Node();
 
-        if(posInFrontNode.terrain == Map.Terrain.Tree)
+        if (!skipTerrainCheck)
+        {
+            posInFrontNode = GridData.Instance.GetNodeAt((int)posInFront.x, (int)posInFront.y);
+        }
+        
+
+        if(skipTerrainCheck || posInFrontNode.terrain == Map.Terrain.Tree)
         {
 
-            //currently not work because it doesnt know which way the player is facing
-            //probably do something with the neighbours of current position
-            Node posInToRight = GridData.Instance.GetNodeAt((int)posInFront.x + 1, (int)posInFront.y);
-            Node posInToLeft = GridData.Instance.GetNodeAt((int)posInFront.x - 1, (int)posInFront.y);
-
-            bool canGoRight = true;
-            bool canGoLeft = true;
-
-            if (posInToRight.terrain == Map.Terrain.Tree)
+            List<Node> possibleMoveTiles = new List<Node>();
+            foreach (Node node in currentPosNode.neighbours)
             {
-                canGoRight = false;
-            }
-            if (posInToLeft.terrain == Map.Terrain.Tree)
-            {
-                canGoLeft = false;
+                if(node.terrain != Map.Terrain.Tree)
+                {
+                    possibleMoveTiles.Add(node);
+                }
             }
 
-            if (!canGoLeft && !canGoRight)
+            //just to be sure there is a valid node
+            if(possibleMoveTiles.Count == 0)
             {
                 return 180f;
             }
-            else if (canGoRight && !canGoLeft)
-            {
-                return 90f;
-            }
-            else if (canGoLeft)
-            {
-                return -90f;
-            }
+
+            int randomIndex = Random.Range(0, possibleMoveTiles.Count - 1);
+
+            Node pickedNode = possibleMoveTiles[randomIndex];
+            Vector3 dir = transform.position - new Vector3(pickedNode.position.x, pickedNode.position.y, 0f); 
+            Quaternion rot = Quaternion.LookRotation(dir, Vector3.up);
+            return rot.eulerAngles.y;
         }
         return Random.Range(-maxNewSteeringAngleDelta, maxNewSteeringAngleDelta);
     }
