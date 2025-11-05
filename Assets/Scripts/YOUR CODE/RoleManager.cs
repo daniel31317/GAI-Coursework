@@ -48,22 +48,10 @@ public class RoleManager : MonoBehaviour
         startNode.onOpenList = true;
         openNodeList.Add(startNode);
 
+
+        //score every single possible grid we can go to
         while (openNodeList.Count > 0)
         {
-            //sort list
-            for (int i = 0; i < openNodeList.Count - 1; i++)
-            {
-                for (int j = 0; j < openNodeList.Count - 1 - i; j++)
-                {
-                    if (openNodeList[j].f > openNodeList[j + 1].f)
-                    {
-                        Node temp = openNodeList[j];
-                        openNodeList[j] = openNodeList[j + 1];
-                        openNodeList[j + 1] = temp;
-                    }
-                }
-            }
-
             Node currentNode = openNodeList[0];
             openNodeList.RemoveAt(0);
 
@@ -74,7 +62,8 @@ public class RoleManager : MonoBehaviour
 
             foreach (Node childNode in currentNode.neighbours)
             {
-                if (!childNode.onClosedList)
+                //check if it has 8 neighbours as well since I dont want to check tiles next to tree walls and borders
+                if (!childNode.onClosedList && childNode.neighbours.Count == 8)
                 {
                     int f = currentNode.f + CalculateInitialCost(currentNode.position, childNode.position);
                     if (f <= childNode.f || !childNode.onOpenList)
@@ -92,21 +81,6 @@ public class RoleManager : MonoBehaviour
         }
 
 
-
-        for(int i = 0; i < closedNodeList.Count;)
-        {
-            if (closedNodeList[i].neighbours.Count != 8)
-            {
-                closedNodeList.RemoveAt(i);
-            }
-            else
-            {
-                i++;
-            }
-        }
-
-
-
         //sort closed list
         for (int i = 0; i < closedNodeList.Count - 1; i++)
         {
@@ -122,37 +96,44 @@ public class RoleManager : MonoBehaviour
         }
 
 
+        //testing loop closedNodeList[i].position.x == 1 && closedNodeList[i].position.y == 1
+        for (int i = 0; i < closedNodeList.Count; i++)
+        {
+            int x = 5;
+        }
+
+
         //get points of interest and remove anthing within +/- 5 on x and y
         List<Node> pointOfInterest = new List<Node>();
 
-        if(closedNodeList.Count > 0)
+        while (closedNodeList.Count > 0)
         {
-            while (closedNodeList.Count > 0)
+            pointOfInterest.Add(closedNodeList[0]);
+            closedNodeList.RemoveAt(0);
+
+            List<Node> nodesToRemove = new List<Node>();    
+
+            if(closedNodeList.Count > 1)
             {
-                pointOfInterest.Add(closedNodeList[0]);
-                closedNodeList.RemoveAt(0);
-
-                List<Node> nodesToRemove = new List<Node>();    
-
-                if(closedNodeList.Count > 1)
+                //loop thorugh closed list with current point of interest and anything out of distance add to remove list
+                for (int i = 0; i < closedNodeList.Count; i++)
                 {
-                    for (int i = 0; i < closedNodeList.Count; i++)
+                    if (IsNodeInRange(pointOfInterest[pointOfInterest.Count - 1], closedNodeList[i]))
                     {
-                        if (IsNodeInRange(pointOfInterest[pointOfInterest.Count - 1], closedNodeList[i]))
-                        {
-                            nodesToRemove.Add(closedNodeList[i]);
-                        }
-
+                        nodesToRemove.Add(closedNodeList[i]);
                     }
 
-                    for(int i = 0;i < nodesToRemove.Count; i++)
-                    {
-                        closedNodeList.Remove(nodesToRemove[i]);
-                    }
-                }    
-            }
+                }
+
+                for(int i = 0;i < nodesToRemove.Count; i++)
+                {
+                    closedNodeList.Remove(nodesToRemove[i]);
+                }
+            }    
         }
 
+
+        //show blocks can be removed later
         Vector2 offset = new Vector2(0.5f, 0.5f);
 
         for(int i = 0; i < pointOfInterest.Count; i++)
@@ -170,7 +151,7 @@ public class RoleManager : MonoBehaviour
     {
         Vector2 posDiff = originNode.position - otherNode.position;
 
-        if(Mathf.Abs(posDiff.x) * Mathf.Abs(posDiff.y) <= 144)
+        if(Mathf.Abs(posDiff.x * posDiff.x) + Mathf.Abs(posDiff.y + posDiff.y) <= 144)
         {
             return true;
         }
