@@ -92,6 +92,21 @@ public class RoleManager : MonoBehaviour
         }
 
 
+
+        for(int i = 0; i < closedNodeList.Count;)
+        {
+            if (closedNodeList[i].neighbours.Count != 8)
+            {
+                closedNodeList.RemoveAt(i);
+            }
+            else
+            {
+                i++;
+            }
+        }
+
+
+
         //sort closed list
         for (int i = 0; i < closedNodeList.Count - 1; i++)
         {
@@ -155,7 +170,7 @@ public class RoleManager : MonoBehaviour
     {
         Vector2 posDiff = originNode.position - otherNode.position;
 
-        if(posDiff.x * posDiff.y <= 81)
+        if(Mathf.Abs(posDiff.x) * Mathf.Abs(posDiff.y) <= 144)
         {
             return true;
         }
