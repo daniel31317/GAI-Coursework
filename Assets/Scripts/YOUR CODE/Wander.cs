@@ -17,7 +17,7 @@ public class Wander : SteeringBehaviour
         //get desired velocity to the point
         desiredVelocity = Vector3.Normalize(targetPoint - transform.position) * SteeringAgent.MaxCurrentSpeed;
 
-        // Calculate steering velocity
+        //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
 
         return steeringVelocity;
