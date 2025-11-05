@@ -48,100 +48,18 @@ public class RoleManager : MonoBehaviour
         startNode.onOpenList = true;
         openNodeList.Add(startNode);
 
+        ScoreAllAccessibleNodes(openNodeList, closedNodeList);
 
-        //score every single possible grid we can go to
-        while (openNodeList.Count > 0)
-        {
-            Node currentNode = openNodeList[0];
-            openNodeList.RemoveAt(0);
+        RemoveNodesWith8Neighbours(closedNodeList);
 
-            currentNode.onOpenList = false;
-            currentNode.onClosedList = true;
-            closedNodeList.Add(currentNode);
-
-
-            foreach (Node childNode in currentNode.neighbours)
-            {
-                if (!childNode.onClosedList)
-                {
-                    int f = currentNode.f + CalculateInitialCost(currentNode.position, childNode.position);
-                    if (f <= childNode.f || !childNode.onOpenList)
-                    {
-                        childNode.f = f;
-                    }
-                    if (!childNode.onOpenList)
-                    {
-                        childNode.SetParent(currentNode);
-                        childNode.onOpenList = true;
-                        openNodeList.Add(childNode);
-                    }
-                }
-            }
-        }
-
-        for(int i = 0; i < closedNodeList.Count;)
-        {
-            if (closedNodeList[i].neighbours.Count != 8)
-            {
-                closedNodeList.RemoveAt(i); 
-            }
-            else
-            {
-                i++;
-            }
-        }
-
-
-
-
-
-
-
-
-
-        //sort closed list
-        for (int i = 0; i < closedNodeList.Count - 1; i++)
-        {
-            for (int j = 0; j < closedNodeList.Count - 1 - i; j++)
-            {
-                if (closedNodeList[j].f < closedNodeList[j + 1].f)
-                {
-                    Node temp = closedNodeList[j];
-                    closedNodeList[j] = closedNodeList[j + 1];
-                    closedNodeList[j + 1] = temp;
-                }
-            }
-        }
-
+        SortNodeListByDescendingF(closedNodeList);
 
         //get points of interest and remove anthing within +/- 5 on x and y
-        List<Node> pointOfInterest = new List<Node>();
+        List<Node> pointOfInterest = GetNodesOfInterest(closedNodeList);
 
-        while (closedNodeList.Count > 0)
-        {
-            pointOfInterest.Add(closedNodeList[0]);
-            closedNodeList.RemoveAt(0);
 
-            List<Node> nodesToRemove = new List<Node>();    
+        //return GetNodesOfInterest(closedNodeList);
 
-            if(closedNodeList.Count > 1)
-            {
-                //loop thorugh closed list with current point of interest and anything out of distance add to remove list
-                for (int i = 0; i < closedNodeList.Count; i++)
-                {
-                    if (IsNodeInRange(pointOfInterest[pointOfInterest.Count - 1], closedNodeList[i]))
-                    {
-                        nodesToRemove.Add(closedNodeList[i]);
-                    }
-
-                }
-
-                for(int i = 0;i < nodesToRemove.Count; i++)
-                {
-                    closedNodeList.Remove(nodesToRemove[i]);
-                }
-            }    
-        }
 
 
         //show blocks can be removed later
@@ -157,29 +75,123 @@ public class RoleManager : MonoBehaviour
         return pointOfInterest;
     }
 
-
-    public bool IsNodeInRange(Node originNode, Node otherNode)
+    private void ScoreAllAccessibleNodes(List<Node> openList, List<Node> closedList)
     {
-        int distanceLimit = 15;
-
-        Vector2 posDiff = originNode.position - otherNode.position;
-        if (posDiff.sqrMagnitude <= distanceLimit * distanceLimit)
+        //score every single possible grid we can go to using a scoring system simlar to dijsktra but wiht no sorting
+        while (openList.Count > 0)
         {
-            return true;
-        }
-        return false;
+            Node currentNode = openList[0];
+            openList.RemoveAt(0);
 
-        if (Mathf.Abs(posDiff.x) <= distanceLimit && Mathf.Abs(posDiff.y) <= distanceLimit)
-        {
-            return true;
+            currentNode.onOpenList = false;
+            currentNode.onClosedList = true;
+            closedList.Add(currentNode);
+
+
+            foreach (Node childNode in currentNode.neighbours)
+            {
+                if (!childNode.onClosedList)
+                {
+                    int f = currentNode.f + CalculateInitialCost(currentNode.position, childNode.position);
+                    if (f <= childNode.f || !childNode.onOpenList)
+                    {
+                        childNode.f = f;
+                    }
+                    if (!childNode.onOpenList)
+                    {
+                        childNode.SetParent(currentNode);
+                        childNode.onOpenList = true;
+                        openList.Add(childNode);
+                    }
+                }
+            }
         }
-        return false;
     }
 
 
 
 
-    public int CalculateInitialCost(Vector3 pos1, Vector3 pos2)
+    private void RemoveNodesWith8Neighbours(List<Node> nodes)
+    {
+        //remove non 8 neighboured tiles from list
+        //we dont do this before so the algorithm can still find nodes possible to reach through tight spaces
+        for (int i = 0; i < nodes.Count;)
+        {
+            if (nodes[i].neighbours.Count != 8)
+            {
+                nodes.RemoveAt(i);
+            }
+            else
+            {
+                i++;
+            }
+        }
+    }
+
+    //sort list fro0m highest f score to smallest
+    private void SortNodeListByDescendingF(List<Node> list)
+    {
+        
+        for (int i = 0; i < list.Count - 1; i++)
+        {
+            for (int j = 0; j < list.Count - 1 - i; j++)
+            {
+                if (list[j].f < list[j + 1].f)
+                {
+                    Node temp = list[j];
+                    list[j] = list[j + 1];
+                    list[j + 1] = temp;
+                }
+            }
+        }
+    }
+
+
+
+    //get points of interest and remove anthing within +/- 5 on x and y
+    private List<Node> GetNodesOfInterest(List<Node> nodesToSearch)
+    {
+        List<Node> nodesOfInterest = new List<Node>();
+        while (nodesToSearch.Count > 0)
+        {
+            nodesOfInterest.Add(nodesToSearch[0]);
+            nodesToSearch.RemoveAt(0);
+
+            if (nodesToSearch.Count > 1)
+            {
+                List<Node> nodesToRemove = GetNodesToRemove(nodesToSearch, nodesOfInterest[nodesOfInterest.Count - 1]);
+
+                for (int i = 0; i < nodesToRemove.Count; i++)
+                {
+                    nodesToSearch.Remove(nodesToRemove[i]);
+                }
+            }
+        }
+
+        return nodesOfInterest;
+    }
+
+
+
+    //gets the nodes needed to be removed from the closed list based on distance to an important node
+    private List<Node> GetNodesToRemove(List<Node> nodes, Node rangeNode)
+    {
+        List<Node> removeTheseNodes = new List<Node>();
+        //loop thorugh closed list with current point of interest and anything out of distance add to remove list
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            if (IsNodeInRange(rangeNode,  nodes[i]))
+            {
+                removeTheseNodes.Add(nodes[i]);
+            }
+        }
+
+        return removeTheseNodes;
+    }
+
+
+
+    private int CalculateInitialCost(Vector3 pos1, Vector3 pos2)
     {
         Vector3 cost = pos2 - pos1;
         if ((cost.x + cost.y) < 2)
@@ -192,4 +204,18 @@ public class RoleManager : MonoBehaviour
         }
         return 20;
     }
+
+    private bool IsNodeInRange(Node originNode, Node otherNode)
+    {
+        int distanceLimit = 15;
+
+        Vector2 posDiff = originNode.position - otherNode.position;
+        if (posDiff.sqrMagnitude <= distanceLimit * distanceLimit)
+        {
+            return true;
+        }
+        return false;
+    }
+
+
 }
