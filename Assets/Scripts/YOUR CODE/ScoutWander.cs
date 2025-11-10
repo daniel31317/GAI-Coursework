@@ -1,12 +1,8 @@
-using NUnit.Framework;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 public class ScoutWander : SteeringBehaviour
 {
-    private float maxNewSteeringAngleDelta = 5f;
     private List<Node> currentPath = new List<Node>();
     private Vector3 currentTargetPos = new Vector2();
 
