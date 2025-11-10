@@ -9,7 +9,7 @@ public class RoleManager : MonoBehaviour
 {
     public static RoleManager Instance { get; private set; }
     public GameObject testBlock;
-    public static ScoutManager scoutManager { get; private set; }
+    public static ScoutManager ScoutManager { get; private set; }
 
     private void Awake()
     {
@@ -21,9 +21,9 @@ public class RoleManager : MonoBehaviour
 
     private void Start()
     {
-        scoutManager = (ScoutManager)ScriptableObject.CreateInstance("ScoutManager");
-        scoutManager.InitialiseOnStart();
-        scoutManager.testBlock = testBlock;   
+        ScoutManager = (ScoutManager)ScriptableObject.CreateInstance("ScoutManager");
+        ScoutManager.InitialiseOnStart();
+        ScoutManager.testBlock = testBlock;   
     }
 
     private const int NUMBER_OF_SCOUTS = 1;
@@ -34,7 +34,7 @@ public class RoleManager : MonoBehaviour
         int currentRoleIndex = 0;
         for (int i = 0; i < NUMBER_OF_SCOUTS; i++)
         {
-            scoutManager.SetAgentAsScout((AllyAgent)GameData.Instance.allies[i]);       
+            ScoutManager.SetAgentAsScout((AllyAgent)GameData.Instance.allies[i]);       
             currentRoleIndex++;       
         }
         //now start looping i starting from currentRoleIndex

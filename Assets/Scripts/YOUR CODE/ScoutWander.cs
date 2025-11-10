@@ -25,9 +25,9 @@ public class ScoutWander : SteeringBehaviour
 
     private void HandleIfAllyNeedsNewNodeToPathFind()
     {
-        if (currentPath.Count == 0)
+        if (currentPath.Count == 0 && RoleManager.ScoutManager.nodesToScout.Count > 0)
         {
-            Node closestNodeToScout = RoleManager.scoutManager.GetClosestScoutNode(transform.position);
+            Node closestNodeToScout = RoleManager.ScoutManager.GetClosestScoutNode(transform.position);
             currentPath = PathfindingAlgorithms.AStar(GridData.Instance.GetNodeAt(transform.position), closestNodeToScout);
             if(currentPath != null && currentPath.Count > 0)
             {
