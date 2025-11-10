@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class ScoutManager : MonoBehaviour
+public class ScoutManager : ScriptableObject
 {
     private AllyAgent agent;
     private List<Node> nodesToScout;
@@ -21,7 +21,7 @@ public class ScoutManager : MonoBehaviour
     {
         agent = newAgent;
         agent.SetAgentRole(AllyAgentRole.Scout);
-        agent.AddComponent<Wander>();
+        agent.AddComponent<ScoutWander>();
         ScoutPositionToCheck(agent.transform.position);
     }
 
@@ -108,6 +108,8 @@ public class ScoutManager : MonoBehaviour
         }
     }
 
+
+
     //sort list fro0m highest f score to smallest
     private void SortNodeListByDescendingF(List<Node> list)
     {
@@ -174,15 +176,7 @@ public class ScoutManager : MonoBehaviour
     private int CalculateInitialCost(Vector3 pos1, Vector3 pos2)
     {
         Vector3 cost = pos2 - pos1;
-        if ((cost.x + cost.y) < 2)
-        {
-            if (cost.x > 0)
-            {
-                return 10;
-            }
-            return 10;
-        }
-        return 20;
+        return (int)(cost.x + cost.y) * 10;
     }
 
     private bool IsNodeInRange(Node originNode, Node otherNode)
@@ -195,5 +189,34 @@ public class ScoutManager : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+
+
+    public Node GetClosestNode(Vector3 pos)
+    {
+        if(nodesToScout.Count <= 0)
+        {
+            return null;
+        }
+        //used to get centre of a node
+        Vector2 offsetVector = new Vector2(0.5f, 0.5f);
+        Vector2 agentPosition = new Vector2(agent.transform.position.x, agent.transform.position.y);
+
+        Node closestNode = nodesToScout[0];
+        float closestDistance = Vector2.SqrMagnitude((nodesToScout[0].position + offsetVector) - agentPosition);
+        
+
+        for (int i = 1; i < nodesToScout.Count; i++)
+        {
+            float distance = Vector2.SqrMagnitude((nodesToScout[i].position + offsetVector) - agentPosition);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestNode = nodesToScout[i];
+            }
+        }
+
+        return closestNode;
     }
 }

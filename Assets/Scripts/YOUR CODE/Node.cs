@@ -10,12 +10,14 @@ public class Node
     public List<Node> neighbours { get; private set; }
     public Node parent { get; private set; }
 
+    public int visitOrder;
+
     public bool onOpenList = false;
     public bool onClosedList = false;
 
-    public int f;
-    public int g;
-    public int h;
+    public int f = 0;
+    public int g = 0;
+    public int h = 0;
 
     public void SetPosition(Vector2 position)
     {
@@ -42,6 +44,16 @@ public class Node
         this.parent = parent;
     }
 
-    
+    public void Reset()
+    {
+        parent = null;
+        visitOrder = 0;
+        onOpenList = false;
+        onClosedList = false;
+        f = 0;
+        g = 0;
+        h = 0;
+
+}
 
 }
