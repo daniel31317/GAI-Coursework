@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class ScoutManager : ScriptableObject
 {
     private AllyAgent agent;
-    private List<Node> nodesToScout;
+    public List<Node> nodesToScout { get; private set; }
 
     public GameObject testBlock;
     public GameObject testBlockParent;
@@ -53,6 +54,7 @@ public class ScoutManager : ScriptableObject
             GameObject temp = Instantiate(testBlock, nodesToScout[i].position + offset, Quaternion.identity);
             temp.transform.parent = testBlockParent.transform;
         }
+
     }
 
     private void ScoreAllAccessibleNodes(List<Node> openList, List<Node> closedList)
@@ -137,6 +139,7 @@ public class ScoutManager : ScriptableObject
         while (nodesToSearch.Count > 0)
         {
             nodesOfInterest.Add(nodesToSearch[0]);
+            nodesToSearch[0].Reset();
             nodesToSearch.RemoveAt(0);
 
             if (nodesToSearch.Count > 1)
@@ -146,6 +149,7 @@ public class ScoutManager : ScriptableObject
                 for (int i = 0; i < nodesToRemove.Count; i++)
                 {
                     nodesToSearch.Remove(nodesToRemove[i]);
+                    nodesToRemove[i].Reset();
                 }
             }
         }
@@ -193,7 +197,7 @@ public class ScoutManager : ScriptableObject
 
 
 
-    public Node GetClosestNode(Vector3 pos)
+    public Node GetClosestScoutNode(Vector3 pos)
     {
         if(nodesToScout.Count <= 0)
         {
@@ -205,7 +209,9 @@ public class ScoutManager : ScriptableObject
 
         Node closestNode = nodesToScout[0];
         float closestDistance = Vector2.SqrMagnitude((nodesToScout[0].position + offsetVector) - agentPosition);
-        
+
+        int currentIndex = 0;
+
 
         for (int i = 1; i < nodesToScout.Count; i++)
         {
@@ -214,9 +220,14 @@ public class ScoutManager : ScriptableObject
             {
                 closestDistance = distance;
                 closestNode = nodesToScout[i];
+                currentIndex = i;
             }
         }
 
+
+        Destroy(testBlockParent.transform.GetChild(currentIndex).gameObject);
+        nodesToScout.Remove(closestNode);
         return closestNode;
     }
+
 }

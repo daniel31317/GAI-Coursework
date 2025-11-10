@@ -1,21 +1,21 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 public class ScoutWander : SteeringBehaviour
 {
     private float maxNewSteeringAngleDelta = 5f;
+    private List<Node> currentPath = new List<Node>();
+    private Vector3 currentTargetPos = new Vector2();
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
-        Quaternion newRotation = Quaternion.Euler(transform.rotation.x, transform.rotation.y, transform.rotation.z + GetOffsetForSteering());
-
-        Vector3 desiredDirection = newRotation * transform.up;
-
-        Vector3 targetPoint = transform.position + (Vector3.Normalize(desiredDirection) * 5f);
+        HandleIfAllyNeedsNewNodeToPathFind();
 
         //get desired velocity to the point
-        desiredVelocity = Vector3.Normalize(targetPoint - transform.position) * SteeringAgent.MaxCurrentSpeed;
+        desiredVelocity = Vector3.Normalize(currentTargetPos - transform.position) * SteeringAgent.MaxCurrentSpeed;
 
         //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
@@ -23,55 +23,43 @@ public class ScoutWander : SteeringBehaviour
         return steeringVelocity;
     }
 
-
-    private float GetOffsetForSteering()
+    private void HandleIfAllyNeedsNewNodeToPathFind()
     {
-        Vector3 posInFront = transform.position + (transform.up * 2);
-
-        DebugDrawCircle("Yippee", posInFront, 0.5f, Color.yellow);
-
-        bool skipTerrainCheck = false;
-
-        if (posInFront.x >= 100 || posInFront.x < 0 || posInFront.y >= 100 || posInFront.y < 0)
+        if (currentPath.Count == 0)
         {
-            skipTerrainCheck = true;
-        }
-
-        Node currentPosNode = GridData.Instance.GetNodeAt((int)transform.position.x, (int)transform.position.y);
-        Node posInFrontNode = new Node();
-
-        if (!skipTerrainCheck)
-        {
-            posInFrontNode = GridData.Instance.GetNodeAt((int)posInFront.x, (int)posInFront.y);
-        }
-        
-
-        if(skipTerrainCheck || posInFrontNode.terrain == Map.Terrain.Tree)
-        {
-
-            List<Node> possibleMoveTiles = new List<Node>();
-            foreach (Node node in currentPosNode.neighbours)
+            Node closestNodeToScout = RoleManager.scoutManager.GetClosestScoutNode(transform.position);
+            currentPath = PathfindingAlgorithms.AStar(GridData.Instance.GetNodeAt(transform.position), closestNodeToScout);
+            if(currentPath != null && currentPath.Count > 0)
             {
-                if(node.terrain != Map.Terrain.Tree)
-                {
-                    possibleMoveTiles.Add(node);
-                }
+                //remove start node
+                currentPath.Remove(GridData.Instance.GetNodeAt(transform.position));
+
+                currentTargetPos = GenerateNewTargetPosWithOffset(currentPath[0]);
+                currentPath.RemoveAt(0);
+                
             }
-
-            //just to be sure there is a valid node
-            if(possibleMoveTiles.Count == 0)
-            {
-                return 180f;
-            }
-
-            int randomIndex = Random.Range(0, possibleMoveTiles.Count - 1);
-
-            Node pickedNode = possibleMoveTiles[randomIndex];
-            Vector3 dir = transform.position - new Vector3(pickedNode.position.x, pickedNode.position.y, 0f); 
-            Quaternion rot = Quaternion.LookRotation(dir, Vector3.up);
-            return rot.eulerAngles.y;
+            return;
         }
-        return Random.Range(-maxNewSteeringAngleDelta, maxNewSteeringAngleDelta);
+
+
+        if(currentPath.Count > 0)
+        {
+            float distanceToCurrentNode = Vector3.SqrMagnitude(transform.position - currentTargetPos);
+
+            if (distanceToCurrentNode < 1f)
+            {
+                currentTargetPos = GenerateNewTargetPosWithOffset(currentPath[0]);
+                currentPath.RemoveAt(0);
+            }
+        }
     }
 
+
+    private Vector3 GenerateNewTargetPosWithOffset(Node node)
+    {
+        Vector3 newTargetPos = new Vector3(node.position.x, node.position.y, 0f);
+        newTargetPos.x += Random.Range(0f, 1f);
+        newTargetPos.y += Random.Range(0f, 1f);
+        return newTargetPos;
+    }
 }

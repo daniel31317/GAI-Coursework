@@ -9,7 +9,7 @@ public class RoleManager : MonoBehaviour
 {
     public static RoleManager Instance { get; private set; }
     public GameObject testBlock;
-    public ScoutManager scoutManager { get; private set; }
+    public static ScoutManager scoutManager { get; private set; }
 
     private void Awake()
     {
@@ -21,7 +21,7 @@ public class RoleManager : MonoBehaviour
 
     private void Start()
     {
-        scoutManager = new ScoutManager();
+        scoutManager = (ScoutManager)ScriptableObject.CreateInstance("ScoutManager");
         scoutManager.InitialiseOnStart();
         scoutManager.testBlock = testBlock;   
     }

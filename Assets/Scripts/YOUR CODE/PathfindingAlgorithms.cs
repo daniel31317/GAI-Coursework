@@ -20,7 +20,6 @@ public static class PathfindingAlgorithms
 
         openNodeList.Add(startNode);
         nodesToReset.Add(startNode);
-        Node temp = new Node();
 
         while (openNodeList.Count > 0)
         {
@@ -31,7 +30,7 @@ public static class PathfindingAlgorithms
                 {
                     if (openNodeList[j].f > openNodeList[j + 1].f)
                     {
-                        temp = openNodeList[j];
+                        Node temp = openNodeList[j];
                         openNodeList[j] = openNodeList[j + 1];
                         openNodeList[j + 1] = temp;
                     }
