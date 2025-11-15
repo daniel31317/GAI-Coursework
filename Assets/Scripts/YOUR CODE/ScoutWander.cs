@@ -5,8 +5,15 @@ using UnityEngine;
 public class ScoutWander : SteeringBehaviour
 {
     private List<Node> currentPath = new List<Node>();
-    private Vector3 currentTargetPos = new Vector2();
+    private int currentPathIndex = 0;
+
+    private Vector3 currentTargetPos = new Vector3();
+    private List<Vector3> previousTargetPositions = new List<Vector3>();
+
+
+
     private Node currentClosestNode;
+    private AllyAgent followerScout;
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
@@ -36,18 +43,24 @@ public class ScoutWander : SteeringBehaviour
             IsThereACloserNode();
         }
     
-        if(currentPath.Count > 0)
+        if(currentPathIndex < currentPath.Count - 1)
         {
             float distanceToCurrentNode = Vector3.SqrMagnitude(transform.position - currentTargetPos);
 
             if (distanceToCurrentNode < 1f)
             {
                 //get new node
-                currentTargetPos = GenerateNewTargetPosWithOffset(currentPath[0]);
-                currentPath.RemoveAt(0);
+                currentPathIndex++;
+                currentTargetPos = GenerateNewTargetPosWithOffset(currentPath[currentPathIndex]);
+                previousTargetPositions.Add(currentTargetPos);
+                if (currentPathIndex >= 2)
+                {
+                    followerScout.GetComponent<ScoutFollow>().SetTargetPos(previousTargetPositions[currentPathIndex - 2]);
+                }
+                
 
                 //reached final node
-                if(currentPath.Count == 0)
+                if(currentPathIndex == currentPath.Count - 1)
                 {
                     RoleManager.ScoutManager.RemoveScoutedNode(currentClosestNode);
                 }
@@ -69,8 +82,9 @@ public class ScoutWander : SteeringBehaviour
 
             //set current target 
             currentTargetPos = GenerateNewTargetPosWithOffset(currentPath[0]);
-            currentPath.RemoveAt(0);
-
+            previousTargetPositions.Clear();
+            previousTargetPositions.Add(currentTargetPos);
+            currentPathIndex = 0;
         }
     }
 
@@ -97,5 +111,11 @@ public class ScoutWander : SteeringBehaviour
         newTargetPos.x += UnityEngine.Random.Range(0f, 1f);
         newTargetPos.y += UnityEngine.Random.Range(0f, 1f);
         return newTargetPos;
+    }
+
+
+    public void SetFollowerScout(AllyAgent lead)
+    {
+        followerScout = lead;
     }
 }

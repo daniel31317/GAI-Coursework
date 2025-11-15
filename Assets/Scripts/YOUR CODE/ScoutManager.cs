@@ -5,7 +5,8 @@ using UnityEngine;
 
 public class ScoutManager : ScriptableObject
 {
-    private AllyAgent agent;
+    private AllyAgent leadScout;
+    private AllyAgent followScout;
     public List<Node> nodesToScout { get; private set; }
 
     public GameObject testBlock;
@@ -18,14 +19,23 @@ public class ScoutManager : ScriptableObject
     }
 
 
-    public void SetAgentAsScout(AllyAgent newAgent)
+    public void SetAgentAsScoutLead(AllyAgent newAgent)
     {
-        agent = newAgent;
-        agent.SetAgentRole(AllyAgentRole.Scout);
-        agent.AddComponent<ScoutWander>();
+        leadScout = newAgent;
+        leadScout.SetAgentRole(AllyAgentRole.LeadScout);
+        leadScout.AddComponent<ScoutWander>();
+        ScoutPositionToCheck(leadScout.transform.position);
     }
 
-    public void ScoutPositionToCheck(Vector3 pos)
+    public void SetAgentAsScoutFollower(AllyAgent newAgent)
+    {
+        followScout = newAgent;
+        followScout.SetAgentRole(AllyAgentRole.FollowerScout);
+        followScout.AddComponent<ScoutFollow>();
+        leadScout.GetComponent<ScoutWander>().SetFollowerScout(followScout);
+    }
+
+    private void ScoutPositionToCheck(Vector3 pos)
     {
 
         List<Node> openNodeList = new List<Node>();
@@ -204,7 +214,7 @@ public class ScoutManager : ScriptableObject
         }
         //used to get centre of a node
         Vector2 offsetVector = new Vector2(0.5f, 0.5f);
-        Vector2 agentPosition = new Vector2(agent.transform.position.x, agent.transform.position.y);
+        Vector2 agentPosition = new Vector2(leadScout.transform.position.x, leadScout.transform.position.y);
 
         Node closestNode = nodesToScout[0];
         float closestDistance = Vector2.SqrMagnitude((nodesToScout[0].position + offsetVector) - agentPosition);

@@ -48,8 +48,14 @@ public class AllyAgent : SteeringAgent
                 mouseInWorld.z = 0.0f;
                 transform.up = Vector3.Normalize(mouseInWorld - transform.position);
                 break;
-			case AllyAgentRole.Scout:
+			case AllyAgentRole.LeadScout:
                 if (GetComponent<ScoutWander>().enabled)
+                {
+                    base.UpdateDirection();
+                }
+                break;
+            case AllyAgentRole.FollowerScout:
+                if (GetComponent<ScoutFollow>().enabled)
                 {
                     base.UpdateDirection();
                 }

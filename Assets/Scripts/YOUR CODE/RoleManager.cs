@@ -31,14 +31,11 @@ public class RoleManager : MonoBehaviour
 
     public void AssignRoles()
     {
-        int currentRoleIndex = 0;
-        for (int i = 0; i < NUMBER_OF_SCOUTS; i++)
-        {
-            ScoutManager.SetAgentAsScout((AllyAgent)GameData.Instance.allies[i]);
-            currentRoleIndex++;
-        }
+        ScoutManager.SetAgentAsScoutLead((AllyAgent)GameData.Instance.allies[0]);
+        ScoutManager.SetAgentAsScoutFollower((AllyAgent)GameData.Instance.allies[1]);
 
-        ScoutManager.ScoutPositionToCheck(GameData.Instance.allies[0].transform.position);
+
+
         //now start looping i starting from currentRoleIndex
     }
 
