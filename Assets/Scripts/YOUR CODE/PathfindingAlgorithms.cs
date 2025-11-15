@@ -98,13 +98,32 @@ public static class PathfindingAlgorithms
     //from practical earlier in the year
     private static List<Node> GetFoundPath(Node endNode)
     {
-        List<Node> foundPath = new List<Node>();
+        Node initialNode = endNode;
+        int expectedPathLength = 0;
+        while (endNode.parent != null)
+        {
+            if (endNode.parent.parent == endNode)
+            {
+                break;
+            }
+            endNode = endNode.parent;
+            expectedPathLength++;
+        }
+
+        List<Node> foundPath = new List<Node>(expectedPathLength);
+        
+        endNode = initialNode;
+
         if (endNode != null)
         {
             foundPath.Add(endNode);
 
             while (endNode.parent != null)
             {
+                if (endNode.parent.parent == endNode)
+                {
+                    break;
+                }
                 foundPath.Add(endNode.parent);
                 endNode = endNode.parent;
             }
