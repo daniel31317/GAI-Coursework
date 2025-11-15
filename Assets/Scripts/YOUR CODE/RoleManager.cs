@@ -34,9 +34,11 @@ public class RoleManager : MonoBehaviour
         int currentRoleIndex = 0;
         for (int i = 0; i < NUMBER_OF_SCOUTS; i++)
         {
-            ScoutManager.SetAgentAsScout((AllyAgent)GameData.Instance.allies[i]);       
-            currentRoleIndex++;       
+            ScoutManager.SetAgentAsScout((AllyAgent)GameData.Instance.allies[i]);
+            currentRoleIndex++;
         }
+
+        ScoutManager.ScoutPositionToCheck(GameData.Instance.allies[0].transform.position);
         //now start looping i starting from currentRoleIndex
     }
 

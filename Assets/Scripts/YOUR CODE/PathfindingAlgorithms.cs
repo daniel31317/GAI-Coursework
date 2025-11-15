@@ -47,13 +47,23 @@ public static class PathfindingAlgorithms
                 return GetFoundPath(endNode);
             }
 
-            foreach (Node childNode in openNodeList[0].neighbours)
+            for (int i = 0; i < openNodeList[0].neighbours.Count; i++)
             {
+                Node childNode = openNodeList[0].neighbours[i];
                 if (!childNode.onClosedList)
                 {
                     childNode.g = openNodeList[0].g + CalculateInitialCost(openNodeList[0].position, childNode.position);
                     childNode.h = ManhattanDistanceHeuristic(childNode.position, endNode.position);
                     int f = childNode.g + childNode.h;
+
+                    if (childNode.terrain == Map.Terrain.Mud)
+                    {
+                        f *= 2;
+                    }
+                    else if (childNode.terrain == Map.Terrain.Water)
+                    {
+                        f *= 4;
+                    }
 
                     if (f <= childNode.f || !childNode.onOpenList)
                     {
@@ -77,9 +87,9 @@ public static class PathfindingAlgorithms
 
     public static void ResetNodesToDefaualt(List<Node> nodes)
     {
-        foreach(Node node in nodes)
+        for(int i = 0; i < nodes.Count; i++)
         {
-            node.Reset();
+            nodes[i].Reset();
         }
         nodes.Clear();
     }

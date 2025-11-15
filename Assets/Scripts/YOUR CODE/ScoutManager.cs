@@ -23,10 +23,9 @@ public class ScoutManager : ScriptableObject
         agent = newAgent;
         agent.SetAgentRole(AllyAgentRole.Scout);
         agent.AddComponent<ScoutWander>();
-        ScoutPositionToCheck(agent.transform.position);
     }
 
-    private void ScoutPositionToCheck(Vector3 pos)
+    public void ScoutPositionToCheck(Vector3 pos)
     {
 
         List<Node> openNodeList = new List<Node>();
@@ -39,7 +38,7 @@ public class ScoutManager : ScriptableObject
 
         ScoreAllAccessibleNodes(openNodeList, closedNodeList);
 
-        RemoveNodesWith8Neighbours(closedNodeList);
+        RemoveNodesWithoutCertainAmountOfNeighbours(closedNodeList);
 
         SortNodeListByDescendingF(closedNodeList);
 
@@ -93,13 +92,13 @@ public class ScoutManager : ScriptableObject
 
 
 
-    private void RemoveNodesWith8Neighbours(List<Node> nodes)
+    private void RemoveNodesWithoutCertainAmountOfNeighbours(List<Node> nodes)
     {
-        //remove non 8 neighboured tiles from list
+        //remove non certain amount of neighboured tiles from list
         //we dont do this before so the algorithm can still find nodes possible to reach through tight spaces
         for (int i = 0; i < nodes.Count;)
         {
-            if (nodes[i].neighbours.Count != 8)
+            if (nodes[i].neighbours.Count < 6)
             {
                 nodes.RemoveAt(i);
             }
@@ -224,10 +223,17 @@ public class ScoutManager : ScriptableObject
             }
         }
 
-
-        Destroy(testBlockParent.transform.GetChild(currentIndex).gameObject);
-        nodesToScout.Remove(closestNode);
         return closestNode;
     }
 
+
+
+
+
+    public void RemoveScoutedNode(Node node)
+    {
+        int index = nodesToScout.FindIndex(n => n == node);
+        Destroy(testBlockParent.transform.GetChild(index).gameObject);
+        nodesToScout.Remove(node);
+    }
 }
