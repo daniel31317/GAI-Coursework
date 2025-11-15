@@ -10,7 +10,7 @@ public class ScoutWander : SteeringBehaviour
     private Vector3 currentTargetPos = new Vector3();
     private List<Vector3> previousTargetPositions = new List<Vector3>();
 
-
+    private bool returningToBase = false;
 
     private Node currentClosestNode;
     private AllyAgent followerScout;
@@ -30,15 +30,23 @@ public class ScoutWander : SteeringBehaviour
 
     private void HandleIfAllyNeedsNewNodeToPathfind()
     {
-        //if there is not already a current path and there are nodes to scout
-        if (currentPath.Count == 0 && RoleManager.ScoutManager.nodesToScout.Count > 0)
+
+        if(Vector3.SqrMagnitude((Vector3)AllyManager.ScoutManager.tempEnemyLocation.position - transform.position) <= 100)
         {
-            //get the closest node
-            currentClosestNode = RoleManager.ScoutManager.GetClosestScoutNode(transform.position);
+            returningToBase = true;
+            currentClosestNode = GridData.Instance.GetNodeAt(AllyManager.Instance.currentBasePosition);
             PathfindToNewNode();
             return;
         }
-        else
+        //if there is not already a current path and there are nodes to scout
+        if (currentPath.Count == 0 && AllyManager.ScoutManager.nodesToScout.Count > 0)
+        {
+            //get the closest node
+            currentClosestNode = AllyManager.ScoutManager.GetClosestScoutNode(transform.position);
+            PathfindToNewNode();
+            return;
+        }
+        else if (!returningToBase)
         {
             IsThereACloserNode();
         }
@@ -62,7 +70,7 @@ public class ScoutWander : SteeringBehaviour
                 //reached final node
                 if(currentPathIndex == currentPath.Count - 1)
                 {
-                    RoleManager.ScoutManager.RemoveScoutedNode(currentClosestNode);
+                    AllyManager.ScoutManager.RemoveScoutedNode(currentClosestNode);
                 }
             }
         }
@@ -75,7 +83,7 @@ public class ScoutWander : SteeringBehaviour
         currentPath = PathfindingAlgorithms.AStar(GridData.Instance.GetNodeAt(transform.position), currentClosestNode);
 
         //if we have a path
-        if (currentPath != null && currentPath.Count > 0)
+        if (currentPath != null && currentPath.Count > 1)
         {
             //remove start node
             currentPath.Remove(GridData.Instance.GetNodeAt(transform.position));
@@ -92,7 +100,7 @@ public class ScoutWander : SteeringBehaviour
 
     private void IsThereACloserNode()
     {
-        Node closestNode = RoleManager.ScoutManager.GetClosestScoutNode(transform.position);
+        Node closestNode = AllyManager.ScoutManager.GetClosestScoutNode(transform.position);
         if (currentClosestNode != closestNode)
         {
             currentClosestNode = closestNode;

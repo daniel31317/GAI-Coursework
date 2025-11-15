@@ -47,7 +47,7 @@ public class GridData : MonoBehaviour
             }
         }
 
-        RoleManager.Instance.AssignRoles();
+        AllyManager.Instance.AssignRoles();
     }
 
     private void InitialiseGridNode(Node node, int x, int y)

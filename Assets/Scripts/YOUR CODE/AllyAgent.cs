@@ -44,10 +44,12 @@ public class AllyAgent : SteeringAgent
 		switch(agentRole)
 		{
 			case AllyAgentRole.Default:
+				/*
                 var mouseInWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 mouseInWorld.z = 0.0f;
                 transform.up = Vector3.Normalize(mouseInWorld - transform.position);
-                break;
+				*/
+				break;
 			case AllyAgentRole.LeadScout:
                 if (GetComponent<ScoutWander>().enabled)
                 {
