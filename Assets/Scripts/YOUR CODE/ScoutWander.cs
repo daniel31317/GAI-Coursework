@@ -53,8 +53,8 @@ public class ScoutWander : SteeringBehaviour
         {
             IsThereACloserNode();
         }
-    
-        if(currentPathIndex < currentPath.Count - 1)
+
+        if (currentPathIndex < currentPath.Count - 1)
         {
             float distanceToCurrentNode = Vector3.SqrMagnitude(transform.position - currentTargetPos);
 
@@ -68,14 +68,18 @@ public class ScoutWander : SteeringBehaviour
                 {
                     followerScout.GetComponent<ScoutFollow>().SetTargetPos(previousTargetPositions[currentPathIndex - 2]);
                 }
-                
+
 
                 //reached final node
-                if(currentPathIndex == currentPath.Count - 1 && !returningToBase)
+                if (currentPathIndex == currentPath.Count - 1 && !returningToBase)
                 {
                     AllyManager.ScoutManager.RemoveScoutedNode(currentClosestNode);
                 }
             }
+        }
+        else if (returningToBase)
+        {
+            AllyManager.Instance.FoundEnemyToAttack(AllyManager.ScoutManager.tempEnemyLocation.position);
         }
     }
 

@@ -4,7 +4,7 @@ public class AllyAgent : SteeringAgent
 {
 	private Attack.AttackType attackType = Attack.AttackType.AllyGun;
 
-	private AllyAgentRole agentRole = AllyAgentRole.Default;
+	public AllyAgentRole agentRole { get; private set; } = AllyAgentRole.Soldier;
 
 	protected override void InitialiseFromAwake()
 	{
@@ -43,13 +43,12 @@ public class AllyAgent : SteeringAgent
 	{
 		switch(agentRole)
 		{
-			case AllyAgentRole.Default:
-				/*
-                var mouseInWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                mouseInWorld.z = 0.0f;
-                transform.up = Vector3.Normalize(mouseInWorld - transform.position);
-				*/
-				break;
+			case AllyAgentRole.Soldier:
+                if (GetComponent<RunToLocatedEnemy>().enabled)
+                {
+                    base.UpdateDirection();
+                }
+                break;
 			case AllyAgentRole.LeadScout:
                 if (GetComponent<ScoutWander>().enabled)
                 {
