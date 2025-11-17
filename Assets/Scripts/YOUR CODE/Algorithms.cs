@@ -159,29 +159,39 @@ public static class Algorithms
     #endregion
 
     #region line of sight
-    // the following algorithm is from 
+
+    //the following algorithm is from 
     //https://playtechs.blogspot.com/2007/03/raytracing-on-grid.html
     //but has been adapted
 
+
+    //returns a list of nodes beyween two points based on a line drawn between those two points
     public static List<Node> RayTrace(Vector2 startPos, Vector2 endPos)
     {
         List<Node> rayTracedNodes = new List<Node>();
 
-        double dx = Mathf.Abs(startPos.x - endPos.x);
-        double dy = Mathf.Abs(startPos.y - endPos.y);
+        //holds the differnece in positions
+        float dx = Mathf.Abs(startPos.x - endPos.x);
+        float dy = Mathf.Abs(startPos.y - endPos.y);
 
+        //startPos
         int x = Mathf.FloorToInt(startPos.x);
         int y = Mathf.FloorToInt(startPos.y);
 
+        //start n at 1 because we cant loop for zero grid tiles
         int n = 1;
         int x_inc, y_inc;
-        double error;
+        float error;
 
+        //so we avoid divide by zero cases
         if (dx == 0)
         {
             x_inc = 0;
             error = Mathf.Infinity;
         }
+        //these set the x incriment to the endPos
+        //then gets the number of grid tiles between positions
+        //error determines wether we start moving horizontally or not 
         else if (endPos.x > startPos.x)
         {
             x_inc = 1;
@@ -195,6 +205,7 @@ public static class Algorithms
             error = (startPos.x - Mathf.Floor(startPos.x)) * dy;
         }
 
+        //so we avoid divide by zero cases
         if (dy == 0)
         {
             y_inc = 0;
@@ -213,10 +224,16 @@ public static class Algorithms
             error -= (startPos.y - Mathf.Floor(startPos.y)) * dx;
         }
 
+
+        //loop over number of n moves
         for (; n > 0; --n)
         {
+            //add a node that we have looped over
             rayTracedNodes.Add(GridData.Instance.GetNodeAt(new Vector3(x, y, 0)));
 
+
+            //if error is positive we move in the y direction else move in x direction
+            //both based on incriments determined earlier
             if (error > 0)
             {
                 y += y_inc;
