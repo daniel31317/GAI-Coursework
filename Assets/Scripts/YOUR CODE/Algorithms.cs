@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class PathfindingAlgorithms 
+public static class Algorithms 
 {
     public const int movementXCost = 10;
     public const int movementYCost = 10;
     public const int movementDiagonalCost = 14;
     private static List<Node> nodesToReset = new List<Node>();
 
+    #region pathfinding
     public static List<Node> AStar(Node startNode, Node endNode)
     {
         ResetNodesToDefaualt(nodesToReset);
@@ -94,8 +95,7 @@ public static class PathfindingAlgorithms
         nodes.Clear();
     }
 
-
-    //from practical earlier in the year
+    #region from practical earlier in the year
     private static List<Node> GetFoundPath(Node endNode)
     {
         Node initialNode = endNode;
@@ -154,4 +154,96 @@ public static class PathfindingAlgorithms
     {
         return (int)((Mathf.Abs(currentPos.x - targetPos.x) * movementXCost) + (Mathf.Abs(currentPos.y - targetPos.y) * movementYCost));
     }
-}
+    #endregion
+
+    #endregion
+
+    #region line of sight
+    // the following algorithm is from 
+    //https://playtechs.blogspot.com/2007/03/raytracing-on-grid.html
+    //but has been adapted
+
+    public static List<Node> RayTrace(Vector2 startPos, Vector2 endPos)
+    {
+        List<Node> rayTracedNodes = new List<Node>();
+
+        double dx = Mathf.Abs(startPos.x - endPos.x);
+        double dy = Mathf.Abs(startPos.y - endPos.y);
+
+        int x = Mathf.FloorToInt(startPos.x);
+        int y = Mathf.FloorToInt(startPos.y);
+
+        int n = 1;
+        int x_inc, y_inc;
+        double error;
+
+        if (dx == 0)
+        {
+            x_inc = 0;
+            error = Mathf.Infinity;
+        }
+        else if (endPos.x > startPos.x)
+        {
+            x_inc = 1;
+            n += Mathf.FloorToInt(endPos.x) - x;
+            error = (Mathf.Floor(startPos.x) + 1 - startPos.x) * dy;
+        }
+        else
+        {
+            x_inc = -1;
+            n += x - Mathf.FloorToInt(endPos.x);
+            error = (startPos.x - Mathf.Floor(startPos.x)) * dy;
+        }
+
+        if (dy == 0)
+        {
+            y_inc = 0;
+            error -= Mathf.Infinity;
+        }
+        else if (endPos.y > startPos.y)
+        {
+            y_inc = 1;
+            n += Mathf.FloorToInt(endPos.y) - y;
+            error -= (Mathf.Floor(startPos.y) + 1 - startPos.y) * dx;
+        }
+        else
+        {
+            y_inc = -1;
+            n += y - Mathf.FloorToInt(endPos.y);
+            error -= (startPos.y - Mathf.Floor(startPos.y)) * dx;
+        }
+
+        for (; n > 0; --n)
+        {
+            rayTracedNodes.Add(GridData.Instance.GetNodeAt(new Vector3(x, y, 0)));
+
+            if (error > 0)
+            {
+                y += y_inc;
+                error -= dx;
+            }
+            else
+            {
+                x += x_inc;
+                error += dy;
+            }
+        }
+
+        return rayTracedNodes;
+    }
+
+    public static bool IsPositionInLineOfSight(Vector2 startPos, Vector2 endPos)
+    {
+        List<Node> nodes = RayTrace(startPos, endPos);
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            if (nodes[i].terrain == Map.Terrain.Tree)
+            {
+                return false;
+            }
+        }
+        return true;
+
+    }
+        #endregion
+    }
