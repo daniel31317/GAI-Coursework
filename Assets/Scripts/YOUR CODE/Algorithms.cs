@@ -53,9 +53,9 @@ public static class Algorithms
                 Node childNode = openNodeList[0].neighbours[i];
                 if (!childNode.onClosedList)
                 {
-                    childNode.g = openNodeList[0].g + CalculateInitialCost(openNodeList[0].position, childNode.position);
-                    childNode.h = ManhattanDistanceHeuristic(childNode.position, endNode.position);
-                    int f = childNode.g + childNode.h;
+                    int g = openNodeList[0].g + CalculateInitialCost(openNodeList[0].position, childNode.position);
+                    int h = ManhattanDistanceHeuristic(childNode.position, endNode.position);
+                    int f = g + h;
 
                     if (childNode.terrain == Map.Terrain.Mud)
                     {
@@ -69,10 +69,16 @@ public static class Algorithms
                     if (f <= childNode.f || !childNode.onOpenList)
                     {
                         childNode.f = f;
+                        childNode.g = g;
+
+                        //avoid setting the parent of the child that's parent is the child to avoid infinite loops when getting the found path
+                        if (childNode != openNodeList[0].parent)
+                        {
+                            childNode.SetParent(openNodeList[0]);
+                        }
                     }
                     if (!childNode.onOpenList)
                     {
-                        childNode.SetParent(openNodeList[0]);
                         childNode.onOpenList = true;
                         openNodeList.Add(childNode);
                         nodesToReset.Add(childNode);
@@ -98,14 +104,16 @@ public static class Algorithms
     #region from practical earlier in the year
     private static List<Node> GetFoundPath(Node endNode)
     {
+        if(endNode == null)
+        {
+            return null;
+        }
+
+
         Node initialNode = endNode;
         int expectedPathLength = 0;
         while (endNode.parent != null)
         {
-            if (endNode.parent.parent == endNode)
-            {
-                break;
-            }
             endNode = endNode.parent;
             expectedPathLength++;
         }
@@ -114,23 +122,16 @@ public static class Algorithms
         
         endNode = initialNode;
 
-        if (endNode != null)
+        foundPath.Add(endNode);
+
+        while (endNode.parent != null)
         {
-            foundPath.Add(endNode);
-
-            while (endNode.parent != null)
-            {
-                if (endNode.parent.parent == endNode)
-                {
-                    break;
-                }
-                foundPath.Add(endNode.parent);
-                endNode = endNode.parent;
-            }
-
-            // Reverse the path so the start node is at index 0
-            foundPath.Reverse();
+            foundPath.Add(endNode.parent);
+            endNode = endNode.parent;
         }
+
+        // Reverse the path so the start node is at index 0
+        foundPath.Reverse();
         return foundPath;
     }
 

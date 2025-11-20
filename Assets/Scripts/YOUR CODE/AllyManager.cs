@@ -1,9 +1,6 @@
-using NUnit.Framework;
 using System.Collections.Generic;
 using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class AllyManager : MonoBehaviour
 {
@@ -16,6 +13,7 @@ public class AllyManager : MonoBehaviour
     public Node enemyPosition { get; private set; }
 
     public Vector3 currentBasePosition { get; private set; }
+    private List<Node> currentPathToEnemy = new List<Node>();
 
     private void Awake()
     {
@@ -60,6 +58,8 @@ public class AllyManager : MonoBehaviour
         enemyPosition = GridData.Instance.GetNodeAt(position);
         attackEnemies = true;
 
+        currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(currentBasePosition), enemyPosition);
+
         for (int i = 0; i < GameData.Instance.allies.Count; i++)
         {
             if(((AllyAgent)GameData.Instance.allies[i]).agentRole == AllyAgentRole.LeadScout)
@@ -74,6 +74,7 @@ public class AllyManager : MonoBehaviour
 
             ((AllyAgent)GameData.Instance.allies[i]).SetAgentRole(AllyAgentRole.Soldier);
             ((AllyAgent)GameData.Instance.allies[i]).GetComponent<RunToLocatedEnemy>().enabled = true;
+            ((AllyAgent)GameData.Instance.allies[i]).GetComponent<RunToLocatedEnemy>().SetCurrentPath(currentPathToEnemy);
         }
     }
 
