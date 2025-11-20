@@ -6,6 +6,8 @@ public class AllyAgent : SteeringAgent
 
 	public AllyAgentRole agentRole { get; private set; } = AllyAgentRole.Soldier;
 
+	private bool shouldAllyAttack = false;
+
 	protected override void InitialiseFromAwake()
 	{
 		
@@ -16,25 +18,8 @@ public class AllyAgent : SteeringAgent
 	{
 		base.CooperativeArbitration();
 
-		if (Input.GetKeyDown(KeyCode.Alpha1))
+		if(shouldAllyAttack)
 		{
-			attackType = Attack.AttackType.Melee;
-		}
-		if (Input.GetKeyDown(KeyCode.Alpha2))
-		{
-			attackType = Attack.AttackType.AllyGun;
-		}
-		if (Input.GetKeyDown(KeyCode.Alpha3))
-		{
-			attackType = Attack.AttackType.Rocket;
-		}
-		if (Input.GetKey(KeyCode.Space))
-		{
-			if(attackType == Attack.AttackType.Rocket && GameData.Instance.AllyRocketsAvailable <= 0)
-			{
-				attackType = Attack.AttackType.AllyGun;
-			}
-
 			AttackWith(attackType);
 		}
 	}
@@ -69,6 +54,12 @@ public class AllyAgent : SteeringAgent
 	{
 		agentRole = role;
 	}
+
+
+    public void StartAttacking()
+    {
+		shouldAllyAttack = true;
+    }
 
 
 
