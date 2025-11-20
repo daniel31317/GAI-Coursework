@@ -91,27 +91,8 @@ public class AllyManager : MonoBehaviour
 
     private List<Node> GetPositionsDistanceAwayFromNode(Node node, int distance)
     {
-        List<Node> positionNodes = new List<Node>();
-
-        Vector2 centre = node.position;
-
-        int distanceSquared = distance * distance;
-
-        //loop through all positions in a distance square around the centre
-        for(int x = (int)centre.x - distance; x <= centre.x + distance; x++)
-        {
-            for (int y = (int)centre.y - distance; y <= centre.y + distance; y++)
-            {
-                int dx = x - (int)centre.x;
-                int dy = y - (int)centre.y;
-
-                if ((dx * dx) + (dy * dy) < distanceSquared && GridData.Instance.GetNodeAt(x,y).terrain != Map.Terrain.Tree)
-                {
-                    positionNodes.Add(GridData.Instance.GetNodeAt(x, y));
-                }
-            }
-        }
-
+        List<Node> positionNodes = Algorithms.ScoreAllAccessibleNodes(node, distance, distance + 5);
+        positionNodes = Algorithms.GetNodesOfInterest(positionNodes, 2, node.position);
         return positionNodes;
 
     }

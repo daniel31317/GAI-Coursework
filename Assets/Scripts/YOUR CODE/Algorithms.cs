@@ -169,7 +169,7 @@ public static class Algorithms
 
 
     //returns a list of nodes beyween two points based on a line drawn between those two points
-    public static List<Node> RayTrace(Vector2 startPos, Vector2 endPos)
+    private static List<Node> RayTrace(Vector2 startPos, Vector2 endPos)
     {
         List<Node> rayTracedNodes = new List<Node>();
 
@@ -265,5 +265,199 @@ public static class Algorithms
         return true;
 
     }
-        #endregion
+
+
+    #endregion
+
+
+    #region scoring nodes
+
+    public static List<Node> ScoreAllAccessibleNodes(Node startNode)
+    {
+        ResetNodesToDefaualt(nodesToReset);
+
+        List<Node> closedList = new List<Node>();
+        List<Node> openList = new List<Node>();
+
+        startNode.onOpenList = true;
+        openList.Add(startNode);
+
+        //score every single possible grid we can go to using a scoring system simlar to dijsktra but wiht no sorting
+        while (openList.Count > 0)
+        {
+            Node currentNode = openList[0];
+            openList.RemoveAt(0);
+
+            currentNode.onOpenList = false;
+            currentNode.onClosedList = true;
+            closedList.Add(currentNode);
+            nodesToReset.Add(currentNode);
+
+
+            foreach (Node childNode in currentNode.neighbours)
+            {
+                if (!childNode.onClosedList)
+                {
+                    int f = currentNode.f + CalculateInitialCostNoHorizontal(currentNode.position, childNode.position);
+                    if (f <= childNode.f || !childNode.onOpenList)
+                    {
+                        childNode.f = f;
+                    }
+                    if (!childNode.onOpenList)
+                    {
+                        childNode.SetParent(currentNode);
+                        childNode.onOpenList = true;
+                        openList.Add(childNode);
+                    }
+                }
+            }
+        }
+
+        return closedList;
     }
+
+    public static List<Node> ScoreAllAccessibleNodes(Node startNode, int minDistance, int maxDistance)
+    {
+        ResetNodesToDefaualt(nodesToReset);
+
+        List<Node> closedList = new List<Node>();
+        List<Node> openList = new List<Node>();
+
+        startNode.onOpenList = true;
+        openList.Add(startNode);
+
+        //score every single possible grid we can go to using a scoring system simlar to dijsktra but wiht no sorting
+        while (openList.Count > 0)
+        {
+            Node currentNode = openList[0];
+            openList.RemoveAt(0);
+
+            currentNode.onOpenList = false;
+            currentNode.onClosedList = true;
+
+            float distanceSqrd = Vector3.SqrMagnitude(startNode.position - currentNode.position);
+            if (distanceSqrd >= minDistance * minDistance && distanceSqrd <= maxDistance * maxDistance)
+            {
+                closedList.Add(currentNode);
+            }
+
+            nodesToReset.Add(currentNode);
+
+
+            foreach (Node childNode in currentNode.neighbours)
+            {
+                if (!childNode.onClosedList)
+                {
+                    int f = currentNode.f + CalculateInitialCostNoHorizontal(currentNode.position, childNode.position);
+                    if (f <= childNode.f || !childNode.onOpenList)
+                    {
+                        childNode.f = f;
+                    }
+                    if (!childNode.onOpenList)
+                    {
+                        childNode.SetParent(currentNode);
+                        childNode.onOpenList = true;
+                        openList.Add(childNode);
+                    }
+                }
+            }
+        }
+
+        return closedList;
+    }
+
+    private static int CalculateInitialCostNoHorizontal(Vector3 pos1, Vector3 pos2)
+    {
+        Vector3 cost = pos2 - pos1;
+        return (int)(cost.x + cost.y) * 10;
+    }
+
+    //get points of interest and remove anthing within a certain distance
+    public static List<Node> GetNodesOfInterest(List<Node> nodesToSearch, int removeNodesInDistance)
+    {
+        List<Node> nodesOfInterest = new List<Node>();
+        while (nodesToSearch.Count > 0)
+        {
+            nodesOfInterest.Add(nodesToSearch[0]);
+            nodesToSearch[0].Reset();
+            nodesToSearch.RemoveAt(0);
+
+            if (nodesToSearch.Count > 1)
+            {
+                List<Node> nodesToRemove = GetNodesToRemove(nodesToSearch, nodesOfInterest[nodesOfInterest.Count - 1], removeNodesInDistance);
+
+                for (int i = 0; i < nodesToRemove.Count; i++)
+                {
+                    nodesToSearch.Remove(nodesToRemove[i]);
+                    nodesToRemove[i].Reset();
+                }
+            }
+        }
+
+        return nodesOfInterest;
+    }
+
+
+    public static List<Node> GetNodesOfInterest(List<Node> nodesToSearch, int removeNodesInDistance, Vector2 losPos)
+    {
+        List<Node> nodesOfInterest = new List<Node>();
+        while (nodesToSearch.Count > 0)
+        {
+            if (!IsPositionInLineOfSight(nodesToSearch[0].position, losPos))
+            {
+                nodesToSearch[0].Reset();
+                nodesToSearch.RemoveAt(0);
+                continue;
+            }
+            nodesOfInterest.Add(nodesToSearch[0]);
+            nodesToSearch[0].Reset();
+            nodesToSearch.RemoveAt(0);
+
+            if (nodesToSearch.Count > 1)
+            {
+                List<Node> nodesToRemove = GetNodesToRemove(nodesToSearch, nodesOfInterest[nodesOfInterest.Count - 1], removeNodesInDistance);
+
+                for (int i = 0; i < nodesToRemove.Count; i++)
+                {
+                    nodesToSearch.Remove(nodesToRemove[i]);
+                    nodesToRemove[i].Reset();
+                }
+            }
+        }
+
+        return nodesOfInterest;
+    }
+
+
+
+    //gets the nodes needed to be removed from the closed list based on distance to an important node
+    private static List<Node> GetNodesToRemove(List<Node> nodes, Node rangeNode, int distance)
+    {
+        List<Node> removeTheseNodes = new List<Node>();
+        //loop thorugh closed list with current point of interest and anything out of distance add to remove list
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            if (IsNodeInRange(rangeNode, nodes[i], distance))
+            {
+                removeTheseNodes.Add(nodes[i]);
+            }
+        }
+
+        return removeTheseNodes;
+    }
+
+
+
+
+    private static bool IsNodeInRange(Node originNode, Node otherNode, int distance)
+    {
+        Vector2 posDiff = originNode.position - otherNode.position;
+        if (posDiff.sqrMagnitude <= distance * distance)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    #endregion
+}
