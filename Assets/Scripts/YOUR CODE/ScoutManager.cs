@@ -11,15 +11,10 @@ public class ScoutManager : ScriptableObject
 
     public GameObject scoutBlock;
     public GameObject enemyBlock;
-    public GameObject blockParent;
 
     public Node tempEnemyLocation;
     
 
-    public void InitialiseOnStart()
-    {
-        blockParent = Instantiate(new GameObject());
-    }
 
 
     public void SetAgentAsScoutLead(AllyAgent newAgent)
@@ -51,7 +46,7 @@ public class ScoutManager : ScriptableObject
 
         ScoreAllAccessibleNodes(openNodeList, closedNodeList);
 
-        tempEnemyLocation = GridData.Instance.GetNodeAt(new Vector3(58.5f, 20.5f, 0));//closedNodeList[Random.Range(0, closedNodeList.Count - 1)];  
+        tempEnemyLocation = GridData.Instance.GetNodeAt(new Vector3(55.5f, 70.5f, 0));//closedNodeList[Random.Range(0, closedNodeList.Count - 1)];  
 
         RemoveNodesWithoutCertainAmountOfNeighbours(closedNodeList);
 
@@ -65,13 +60,13 @@ public class ScoutManager : ScriptableObject
         for (int i = 0; i < nodesToScout.Count; i++)
         {
             GameObject temp = Instantiate(scoutBlock, nodesToScout[i].position + offset, Quaternion.identity);
-            temp.transform.parent = blockParent.transform;
+            temp.transform.parent = AllyManager.Instance.transform;
         }
 
        
 
         GameObject temp1 = Instantiate(enemyBlock, tempEnemyLocation.position + offset, Quaternion.identity);
-        temp1.transform.parent = blockParent.transform;
+        temp1.transform.parent = AllyManager.Instance.transform;
 
     }
 
@@ -252,7 +247,7 @@ public class ScoutManager : ScriptableObject
     public void RemoveScoutedNode(Node node)
     {
         int index = nodesToScout.FindIndex(n => n == node);
-        Destroy(blockParent.transform.GetChild(index).gameObject);
+        Destroy(AllyManager.Instance.transform.GetChild(index).gameObject);
         nodesToScout.Remove(node);
     }
 }

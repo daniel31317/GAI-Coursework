@@ -12,6 +12,7 @@ public static class Algorithms
     public static List<Node> AStar(Node startNode, Node endNode)
     {
         ResetNodesToDefaualt(nodesToReset);
+        endNode.Reset();
 
         int visitOrder = 0;
         List<Node> openNodeList = new List<Node>();
@@ -72,10 +73,11 @@ public static class Algorithms
                         childNode.g = g;
 
                         //avoid setting the parent of the child that's parent is the child to avoid infinite loops when getting the found path
-                        if (childNode != openNodeList[0].parent)
+                        /*if (childNode != openNodeList[0].parent)
                         {
                             childNode.SetParent(openNodeList[0]);
-                        }
+                        }*/
+                        childNode.SetParent(openNodeList[0]);
                     }
                     if (!childNode.onOpenList)
                     {

@@ -7,13 +7,14 @@ public class AllyManager : MonoBehaviour
     public static AllyManager Instance { get; private set; }
     public GameObject scoutBlock;
     public GameObject enemyBlock;
+    public GameObject moveBlock;
     public static ScoutManager ScoutManager { get; private set; }
 
     public bool attackEnemies { get; private set; } = false;
     public Node enemyPosition { get; private set; }
 
     public Vector3 currentBasePosition { get; private set; }
-    private List<Node> currentPathToEnemy = new List<Node>();
+
 
     private void Awake()
     {
@@ -26,7 +27,6 @@ public class AllyManager : MonoBehaviour
     private void Start()
     {
         ScoutManager = (ScoutManager)ScriptableObject.CreateInstance("ScoutManager");
-        ScoutManager.InitialiseOnStart();
         ScoutManager.scoutBlock = scoutBlock;   
         ScoutManager.enemyBlock = enemyBlock;   
     }
@@ -57,8 +57,8 @@ public class AllyManager : MonoBehaviour
     {
         enemyPosition = GridData.Instance.GetNodeAt(position);
         attackEnemies = true;
-
-        currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(currentBasePosition), enemyPosition);
+        List<Node> movePositions = GetPositionsDistanceAwayFromNode(enemyPosition, 15);
+        
 
         for (int i = 0; i < GameData.Instance.allies.Count; i++)
         {
@@ -71,11 +71,55 @@ public class AllyManager : MonoBehaviour
                 ((AllyAgent)GameData.Instance.allies[i]).GetComponent<ScoutFollow>().enabled = false;
             }
 
+            List<Node> currentPathToEnemy = new List<Node>();
+            if(movePositions.Count > 0)
+            {
+                currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(((AllyAgent)GameData.Instance.allies[i]).transform.position), movePositions[0]);
+                Vector3 offset = new Vector3(0.5f, 0.5f, 1f);
+                GameObject temp = Instantiate(moveBlock, (Vector3)movePositions[0].position + offset, Quaternion.identity);
+                temp.transform.parent = transform;
+                movePositions.RemoveAt(0);
+            }
+            
 
             ((AllyAgent)GameData.Instance.allies[i]).SetAgentRole(AllyAgentRole.Soldier);
             ((AllyAgent)GameData.Instance.allies[i]).GetComponent<RunToLocatedEnemy>().enabled = true;
             ((AllyAgent)GameData.Instance.allies[i]).GetComponent<RunToLocatedEnemy>().SetCurrentPath(currentPathToEnemy);
         }
     }
+
+
+    private List<Node> GetPositionsDistanceAwayFromNode(Node node, int distance)
+    {
+        List<Node> positionNodes = new List<Node>();
+
+        Vector2 centre = node.position;
+
+        int distanceSquared = distance * distance;
+
+        //loop through all positions in a distance square around the centre
+        for(int x = (int)centre.x - distance; x <= centre.x + distance; x++)
+        {
+            for (int y = (int)centre.y - distance; y <= centre.y + distance; y++)
+            {
+                int dx = x - (int)centre.x;
+                int dy = y - (int)centre.y;
+
+                if ((dx * dx) + (dy * dy) < distanceSquared && GridData.Instance.GetNodeAt(x,y).terrain != Map.Terrain.Tree)
+                {
+                    positionNodes.Add(GridData.Instance.GetNodeAt(x, y));
+                }
+            }
+        }
+
+        return positionNodes;
+
+    }
+
+
+
+
+
+
 
 }

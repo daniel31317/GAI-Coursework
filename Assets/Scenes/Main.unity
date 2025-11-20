@@ -566,6 +566,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scoutBlock: {fileID: 8970850816751449026, guid: e6420253482cca3469c609ad1f26a8ae, type: 3}
   enemyBlock: {fileID: 8970850816751449026, guid: 119b2235594c4054f8c7333b45f3f56a, type: 3}
+  moveBlock: {fileID: 8970850816751449026, guid: 12138de4ea569e5448541d54be437b1e, type: 3}
 --- !u!114 &1549639964
 MonoBehaviour:
   m_ObjectHideFlags: 0
