@@ -41,7 +41,7 @@ public class ScoutManager : ScriptableObject
 
         closedNodeList = Algorithms.ScoreAllAccessibleNodes(startNode);
 
-        tempEnemyLocation = GridData.Instance.GetNodeAt(new Vector3(55.5f, 70.5f, 0));//closedNodeList[Random.Range(0, closedNodeList.Count - 1)];  
+        tempEnemyLocation = /*closedNodeList[Random.Range(0, closedNodeList.Count - 1)];*/  GridData.Instance.GetNodeAt(new Vector3(54.5f, 30.5f, 0));
 
         RemoveNodesWithoutCertainAmountOfNeighbours(closedNodeList);
 

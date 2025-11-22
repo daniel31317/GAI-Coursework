@@ -316,7 +316,7 @@ public static class Algorithms
         return closedList;
     }
 
-    public static List<Node> ScoreAllAccessibleNodes(Node startNode, int minDistance, int maxDistance)
+    public static List<Node> ScoreAllAccessibleNodes(Node startNode, int minDistance)
     {
         ResetNodesToDefaualt(nodesToReset);
 
@@ -336,7 +336,7 @@ public static class Algorithms
             currentNode.onClosedList = true;
 
             float distanceSqrd = Vector3.SqrMagnitude(startNode.position - currentNode.position);
-            if (distanceSqrd >= minDistance * minDistance && distanceSqrd <= maxDistance * maxDistance)
+            if (distanceSqrd >= minDistance * minDistance)
             {
                 closedList.Add(currentNode);
             }
@@ -398,24 +398,25 @@ public static class Algorithms
     }
 
 
-    public static List<Node> GetNodesOfInterest(List<Node> nodesToSearch, int removeNodesInDistance, Vector2 losPos)
+    public static (List<Node> losNodes, List<Node> noLosNodes) GetNodesOfInterest(List<Node> nodesToSearch, int removeNodesInDistance, Vector2 losPos)
     {
-        List<Node> nodesOfInterest = new List<Node>();
+        List<Node> nodesOfInterestLos = new List<Node>();
+        List<Node> nodesOfInterestNoLos = new List<Node>();
         while (nodesToSearch.Count > 0)
         {
             if (!IsPositionInLineOfSight(nodesToSearch[0].position, losPos))
             {
-                nodesToSearch[0].Reset();
-                nodesToSearch.RemoveAt(0);
-                continue;
+                nodesOfInterestNoLos.Add(nodesToSearch[0]);
             }
-            nodesOfInterest.Add(nodesToSearch[0]);
-            nodesToSearch[0].Reset();
-            nodesToSearch.RemoveAt(0);
-
+            else
+            {
+                nodesOfInterestLos.Add(nodesToSearch[0]);
+            }
+                
+           
             if (nodesToSearch.Count > 1)
             {
-                List<Node> nodesToRemove = GetNodesToRemove(nodesToSearch, nodesOfInterest[nodesOfInterest.Count - 1], removeNodesInDistance);
+                List<Node> nodesToRemove = GetNodesToRemove(nodesToSearch, nodesToSearch[0], removeNodesInDistance);
 
                 for (int i = 0; i < nodesToRemove.Count; i++)
                 {
@@ -423,9 +424,12 @@ public static class Algorithms
                     nodesToRemove[i].Reset();
                 }
             }
+
+            nodesToSearch[0].Reset();
+            nodesToSearch.RemoveAt(0);
         }
 
-        return nodesOfInterest;
+        return (nodesOfInterestLos, nodesOfInterestNoLos);
     }
 
 

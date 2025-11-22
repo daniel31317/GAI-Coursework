@@ -80,7 +80,7 @@ public class AllyManager : MonoBehaviour
         alliesReadyToAttack = 0;
         enemyPosition = GridData.Instance.GetNodeAt(position);
         attackEnemies = true;
-        List<Node> movePositions = GetPositionsDistanceAwayFromNode(enemyPosition, 15);
+        (List<Node>, List<Node>) movePositions = GetPositionsDistanceAwayFromNode(enemyPosition, 15);
         
 
         for (int i = 0; i < GameData.Instance.allies.Count; i++)
@@ -95,15 +95,49 @@ public class AllyManager : MonoBehaviour
             }
 
             List<Node> currentPathToEnemy = new List<Node>();
-            if(movePositions.Count > 0)
+
+            bool validPath = false;
+
+            Vector3 blockPos = Vector3.zero;
+
+            if (movePositions.Item1.Count > 0)
             {
-                currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(((AllyAgent)GameData.Instance.allies[i]).transform.position), movePositions[0]);
-                Vector3 offset = new Vector3(0.5f, 0.5f, 1f);
-                GameObject temp = Instantiate(moveBlock, (Vector3)movePositions[0].position + offset, Quaternion.identity);
-                temp.transform.parent = transform;
-                movePositions.RemoveAt(0);
+                
+
+                while (!validPath && movePositions.Item1.Count > 0)
+                {
+                    currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(((AllyAgent)GameData.Instance.allies[i]).transform.position), movePositions.Item1[0]);
+                    validPath = CheckPathDoesntGoWithinRangeOfEnemy(currentPathToEnemy, 15);
+                    if (validPath)
+                    {
+                        blockPos = (Vector3)movePositions.Item1[0].position;
+                    }
+                    movePositions.Item1.RemoveAt(0);
+                    
+                }
+                 
+                                 
             }
-            
+            if(movePositions.Item2.Count > 0 && !validPath)
+            {
+
+                while (!validPath && movePositions.Item2.Count > 0)
+                {
+                    currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(((AllyAgent)GameData.Instance.allies[i]).transform.position), movePositions.Item2[0]);
+                    validPath = CheckPathDoesntGoWithinRangeOfEnemy(currentPathToEnemy, 15);
+                    if(validPath)
+                    {
+                        blockPos = (Vector3)movePositions.Item2[0].position;
+                    }
+                    movePositions.Item2.RemoveAt(0);
+                    
+                }
+
+            }
+
+            Vector3 offset = new Vector3(0.5f, 0.5f, 1f);
+            GameObject temp = Instantiate(moveBlock, blockPos + offset, Quaternion.identity);
+            temp.transform.parent = transform;
 
             ((AllyAgent)GameData.Instance.allies[i]).SetAgentRole(AllyAgentRole.Soldier);
             ((AllyAgent)GameData.Instance.allies[i]).GetComponent<RunToLocatedEnemy>().enabled = true;
@@ -112,13 +146,84 @@ public class AllyManager : MonoBehaviour
     }
 
 
-    private List<Node> GetPositionsDistanceAwayFromNode(Node node, int distance)
+    private (List<Node>, List<Node>) GetPositionsDistanceAwayFromNode(Node node, int distance)
     {
-        List<Node> positionNodes = Algorithms.ScoreAllAccessibleNodes(node, distance, distance + 5);
-        positionNodes = Algorithms.GetNodesOfInterest(positionNodes, 2, node.position);
+        List<Node> allNodes = Algorithms.ScoreAllAccessibleNodes(node, distance);
+        (List<Node>, List<Node>) positionNodes = Algorithms.GetNodesOfInterest(allNodes, 2, node.position);
+
+        (List<float>, List<float>) distancesFromBaseToNodes = (new List<float>(), new List<float>());
+
+        //calculate distances
+        for(int i = 0; i < positionNodes.Item1.Count; i++)
+        {
+            distancesFromBaseToNodes.Item1.Add(Vector2.SqrMagnitude(positionNodes.Item1[i].position - enemyPosition.position));
+        }
+
+        //calculate distances
+        for(int i = 0; i < positionNodes.Item2.Count; i++)
+        {
+            distancesFromBaseToNodes.Item2.Add(Vector2.SqrMagnitude(positionNodes.Item2[i].position - enemyPosition.position));
+        }
+
+        //bubble sort from lowest to biggest sqr distance so closer nodes are preffered
+        for (int i = 0; i < positionNodes.Item1.Count - 1; i++)
+        {
+            for (int j = 0; j < positionNodes.Item1.Count - 1 - i; j++)
+            {
+                if (distancesFromBaseToNodes.Item1[j] > distancesFromBaseToNodes.Item1[j + 1])
+                {
+                    Node temp = positionNodes.Item1[j];
+                    float distTemp = distancesFromBaseToNodes.Item1[j];
+
+                    positionNodes.Item1[j] = positionNodes.Item1[j + 1];
+                    positionNodes.Item1[j + 1] = temp;
+
+                    distancesFromBaseToNodes.Item1[j] = distancesFromBaseToNodes.Item1[j + 1];
+                    distancesFromBaseToNodes.Item1[j + 1] = distTemp;
+                }
+            }
+        }
+
+
+        //bubble sort from lowest to biggest sqr distance so closer nodes are preffered
+        for (int i = 0; i < positionNodes.Item2.Count - 1; i++)
+        {
+            for (int j = 0; j < positionNodes.Item2.Count - 1 - i; j++)
+            {
+                if (distancesFromBaseToNodes.Item2[j] > distancesFromBaseToNodes.Item2[j + 1])
+                {
+                    Node temp = positionNodes.Item2[j];
+                    float distTemp = distancesFromBaseToNodes.Item2[j];
+
+                    positionNodes.Item2[j] = positionNodes.Item2[j + 1];
+                    positionNodes.Item2[j + 1] = temp;
+
+                    distancesFromBaseToNodes.Item2[j] = distancesFromBaseToNodes.Item2[j + 1];
+                    distancesFromBaseToNodes.Item2[j + 1] = distTemp;
+                }
+            }
+        }
+
         return positionNodes;
 
     }
+
+
+    private bool CheckPathDoesntGoWithinRangeOfEnemy(List<Node> path, float distance)
+    {
+        for (int i = 0; i < path.Count; i++)
+        {
+            if(Vector2.SqrMagnitude(path[i].position - enemyPosition.position) < distance * distance)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+
+
 
 
     public void AllyInPositionToAttack()
