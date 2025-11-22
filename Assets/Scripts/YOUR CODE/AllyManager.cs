@@ -13,6 +13,8 @@ public class AllyManager : MonoBehaviour
     public bool attackEnemies { get; private set; } = false;
     public Node enemyPosition { get; private set; }
 
+    private int alliesReadyToAttack = 0;
+
     public Vector3 currentBasePosition { get; private set; }
 
 
@@ -29,6 +31,26 @@ public class AllyManager : MonoBehaviour
         ScoutManager = (ScoutManager)ScriptableObject.CreateInstance("ScoutManager");
         ScoutManager.scoutBlock = scoutBlock;   
         ScoutManager.enemyBlock = enemyBlock;   
+    }
+
+    private void Update()
+    {
+        if(!attackEnemies)
+        {
+            return;
+        }
+
+        if(alliesReadyToAttack == GameData.Instance.allies.Count)
+        {
+            alliesReadyToAttack++;
+            for (int i = 0; i < GameData.Instance.allies.Count; i++)
+            {
+                ((AllyAgent)GameData.Instance.allies[i]).GetComponent<AllyAgent>().StartAttacking();
+            }
+        }
+
+
+
     }
 
 
@@ -55,6 +77,7 @@ public class AllyManager : MonoBehaviour
     
     public void FoundEnemyToAttack(Vector2 position)
     {
+        alliesReadyToAttack = 0;
         enemyPosition = GridData.Instance.GetNodeAt(position);
         attackEnemies = true;
         List<Node> movePositions = GetPositionsDistanceAwayFromNode(enemyPosition, 15);
@@ -97,6 +120,11 @@ public class AllyManager : MonoBehaviour
 
     }
 
+
+    public void AllyInPositionToAttack()
+    {
+        alliesReadyToAttack++;
+    }
 
 
 

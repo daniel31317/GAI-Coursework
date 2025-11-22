@@ -13,6 +13,7 @@ public class RunToLocatedEnemy : SteeringBehaviour
     private List<Node> currentPath = new List<Node>();
 
     bool atShootPosition = false;
+    bool readyToShoot = false;
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
@@ -35,6 +36,11 @@ public class RunToLocatedEnemy : SteeringBehaviour
         if(atShootPosition)
         {
             desiredVelocity /= 10000f;
+            if (!readyToShoot)
+            {
+                AllyManager.Instance.AllyInPositionToAttack();
+                readyToShoot = true;
+            }
         }
 
         //calculate steering velocity
@@ -78,7 +84,6 @@ public class RunToLocatedEnemy : SteeringBehaviour
             {
                 currentTargetPos = AllyManager.Instance.enemyPosition.position;
                 atShootPosition = true;
-                GetComponent<AllyAgent>().StartAttacking();
             }          
         }
     }
