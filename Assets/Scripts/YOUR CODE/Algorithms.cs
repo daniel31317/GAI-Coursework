@@ -398,22 +398,28 @@ public static class Algorithms
     }
 
 
-    public static (List<Node> losNodes, List<Node> noLosNodes) GetNodesOfInterest(List<Node> nodesToSearch, int removeNodesInDistance, Vector2 losPos)
+    public static NodesOfInterest GetNodesOfInterest(List<Node> nodesToSearch, int removeNodesInDistance, Vector2 losPos, float distance)
     {
-        List<Node> nodesOfInterestLos = new List<Node>();
-        List<Node> nodesOfInterestNoLos = new List<Node>();
+        NodesOfInterest nodes = new NodesOfInterest(new List<Node>(), new List<Node>(), new List<Node>());
         while (nodesToSearch.Count > 0)
         {
-            if (!IsPositionInLineOfSight(nodesToSearch[0].position, losPos))
+            bool inLos = IsPositionInLineOfSight(nodesToSearch[0].position, losPos);
+            bool withinRange = Vector2.SqrMagnitude(nodesToSearch[0].position - losPos) < distance * distance;  
+            
+            if (inLos && withinRange)
             {
-                nodesOfInterestNoLos.Add(nodesToSearch[0]);
+                nodes.nodesInLosAndRange.Add(nodesToSearch[0]);
+            }
+            else if(inLos && !withinRange)
+            {
+                nodes.nodesInLos.Add(nodesToSearch[0]);
             }
             else
             {
-                nodesOfInterestLos.Add(nodesToSearch[0]);
+                nodes.nodesInNeither.Add(nodesToSearch[0]);
             }
-                
-           
+
+
             if (nodesToSearch.Count > 1)
             {
                 List<Node> nodesToRemove = GetNodesToRemove(nodesToSearch, nodesToSearch[0], removeNodesInDistance);
@@ -429,7 +435,7 @@ public static class Algorithms
             nodesToSearch.RemoveAt(0);
         }
 
-        return (nodesOfInterestLos, nodesOfInterestNoLos);
+        return nodes;
     }
 
 

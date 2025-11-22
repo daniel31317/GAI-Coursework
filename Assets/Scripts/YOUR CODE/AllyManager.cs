@@ -80,7 +80,7 @@ public class AllyManager : MonoBehaviour
         alliesReadyToAttack = 0;
         enemyPosition = GridData.Instance.GetNodeAt(position);
         attackEnemies = true;
-        (List<Node>, List<Node>) movePositions = GetPositionsDistanceAwayFromNode(enemyPosition, 15);
+        NodesOfInterest movePositions = GetPositionsDistanceAwayFromNode(enemyPosition, 10);
         
 
         for (int i = 0; i < GameData.Instance.allies.Count; i++)
@@ -100,40 +100,49 @@ public class AllyManager : MonoBehaviour
 
             Vector3 blockPos = Vector3.zero;
 
-            if (movePositions.Item1.Count > 0)
+            if (movePositions.nodesInLosAndRange.Count > 0)
             {
-                
-
-                while (!validPath && movePositions.Item1.Count > 0)
+                while (!validPath && movePositions.nodesInLosAndRange.Count > 0)
                 {
-                    currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(((AllyAgent)GameData.Instance.allies[i]).transform.position), movePositions.Item1[0]);
-                    validPath = CheckPathDoesntGoWithinRangeOfEnemy(currentPathToEnemy, 15);
+                    currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(((AllyAgent)GameData.Instance.allies[i]).transform.position), movePositions.nodesInLosAndRange[0]);
+                    validPath = CheckPathDoesntGoWithinRangeOfEnemy(currentPathToEnemy, 10);
                     if (validPath)
                     {
-                        blockPos = (Vector3)movePositions.Item1[0].position;
+                        blockPos = (Vector3)movePositions.nodesInLosAndRange[0].position;
                     }
-                    movePositions.Item1.RemoveAt(0);
+                    movePositions.nodesInLosAndRange.RemoveAt(0);
                     
-                }
-                 
-                                 
+                }                             
             }
-            if(movePositions.Item2.Count > 0 && !validPath)
+            if(movePositions.nodesInLos.Count > 0 && !validPath)
             {
-
-                while (!validPath && movePositions.Item2.Count > 0)
+                while (!validPath && movePositions.nodesInLos.Count > 0)
                 {
-                    currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(((AllyAgent)GameData.Instance.allies[i]).transform.position), movePositions.Item2[0]);
-                    validPath = CheckPathDoesntGoWithinRangeOfEnemy(currentPathToEnemy, 15);
+                    currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(((AllyAgent)GameData.Instance.allies[i]).transform.position), movePositions.nodesInLos[0]);
+                    validPath = CheckPathDoesntGoWithinRangeOfEnemy(currentPathToEnemy, 10);
                     if(validPath)
                     {
-                        blockPos = (Vector3)movePositions.Item2[0].position;
+                        blockPos = (Vector3)movePositions.nodesInLos[0].position;
                     }
-                    movePositions.Item2.RemoveAt(0);
-                    
+                    movePositions.nodesInLos.RemoveAt(0);                   
                 }
-
             }
+            if (movePositions.nodesInNeither.Count > 0 && !validPath)
+            {
+                while (!validPath && movePositions.nodesInNeither.Count > 0)
+                {
+                    currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(((AllyAgent)GameData.Instance.allies[i]).transform.position), movePositions.nodesInNeither[0]);
+                    validPath = CheckPathDoesntGoWithinRangeOfEnemy(currentPathToEnemy, 10);
+                    if (validPath)
+                    {
+                        blockPos = (Vector3)movePositions.nodesInNeither[0].position;
+                    }
+                    movePositions.nodesInNeither.RemoveAt(0);
+                }
+            }
+
+
+
 
             Vector3 offset = new Vector3(0.5f, 0.5f, 1f);
             GameObject temp = Instantiate(moveBlock, blockPos + offset, Quaternion.identity);
@@ -146,63 +155,97 @@ public class AllyManager : MonoBehaviour
     }
 
 
-    private (List<Node>, List<Node>) GetPositionsDistanceAwayFromNode(Node node, int distance)
+    private NodesOfInterest GetPositionsDistanceAwayFromNode(Node node, int distance)
     {
         List<Node> allNodes = Algorithms.ScoreAllAccessibleNodes(node, distance);
-        (List<Node>, List<Node>) positionNodes = Algorithms.GetNodesOfInterest(allNodes, 2, node.position);
+        NodesOfInterest positionNodes = Algorithms.GetNodesOfInterest(allNodes, 2, node.position, distance);
 
-        (List<float>, List<float>) distancesFromBaseToNodes = (new List<float>(), new List<float>());
-
-        //calculate distances
-        for(int i = 0; i < positionNodes.Item1.Count; i++)
-        {
-            distancesFromBaseToNodes.Item1.Add(Vector2.SqrMagnitude(positionNodes.Item1[i].position - enemyPosition.position));
-        }
+        List<float> distancesFromBaseToNodes = new List<float>();
 
         //calculate distances
-        for(int i = 0; i < positionNodes.Item2.Count; i++)
+        for(int i = 0; i < positionNodes.nodesInLosAndRange.Count; i++)
         {
-            distancesFromBaseToNodes.Item2.Add(Vector2.SqrMagnitude(positionNodes.Item2[i].position - enemyPosition.position));
+            distancesFromBaseToNodes.Add(Vector2.SqrMagnitude(positionNodes.nodesInLosAndRange[i].position - enemyPosition.position));
         }
 
         //bubble sort from lowest to biggest sqr distance so closer nodes are preffered
-        for (int i = 0; i < positionNodes.Item1.Count - 1; i++)
+        for (int i = 0; i < positionNodes.nodesInLosAndRange.Count - 1; i++)
         {
-            for (int j = 0; j < positionNodes.Item1.Count - 1 - i; j++)
+            for (int j = 0; j < positionNodes.nodesInLosAndRange.Count - 1 - i; j++)
             {
-                if (distancesFromBaseToNodes.Item1[j] > distancesFromBaseToNodes.Item1[j + 1])
+                if (distancesFromBaseToNodes[j] > distancesFromBaseToNodes[j + 1])
                 {
-                    Node temp = positionNodes.Item1[j];
-                    float distTemp = distancesFromBaseToNodes.Item1[j];
+                    Node temp = positionNodes.nodesInLosAndRange[j];
+                    float distTemp = distancesFromBaseToNodes[j];
 
-                    positionNodes.Item1[j] = positionNodes.Item1[j + 1];
-                    positionNodes.Item1[j + 1] = temp;
+                    positionNodes.nodesInLosAndRange[j] = positionNodes.nodesInLosAndRange[j + 1];
+                    positionNodes.nodesInLosAndRange[j + 1] = temp;
 
-                    distancesFromBaseToNodes.Item1[j] = distancesFromBaseToNodes.Item1[j + 1];
-                    distancesFromBaseToNodes.Item1[j + 1] = distTemp;
+                    distancesFromBaseToNodes[j] = distancesFromBaseToNodes[j + 1];
+                    distancesFromBaseToNodes[j + 1] = distTemp;
                 }
             }
         }
 
 
-        //bubble sort from lowest to biggest sqr distance so closer nodes are preffered
-        for (int i = 0; i < positionNodes.Item2.Count - 1; i++)
+        distancesFromBaseToNodes.Clear();
+
+
+
+        //calculate distances
+        for (int i = 0; i < positionNodes.nodesInLos.Count; i++)
         {
-            for (int j = 0; j < positionNodes.Item2.Count - 1 - i; j++)
+            distancesFromBaseToNodes.Add(Vector2.SqrMagnitude(positionNodes.nodesInLos[i].position - enemyPosition.position));
+        }
+
+        //bubble sort from lowest to biggest sqr distance so closer nodes are preffered
+        for (int i = 0; i < positionNodes.nodesInLos.Count - 1; i++)
+        {
+            for (int j = 0; j < positionNodes.nodesInLos.Count - 1 - i; j++)
             {
-                if (distancesFromBaseToNodes.Item2[j] > distancesFromBaseToNodes.Item2[j + 1])
+                if (distancesFromBaseToNodes[j] > distancesFromBaseToNodes[j + 1])
                 {
-                    Node temp = positionNodes.Item2[j];
-                    float distTemp = distancesFromBaseToNodes.Item2[j];
+                    Node temp = positionNodes.nodesInLos[j];
+                    float distTemp = distancesFromBaseToNodes[j];
 
-                    positionNodes.Item2[j] = positionNodes.Item2[j + 1];
-                    positionNodes.Item2[j + 1] = temp;
+                    positionNodes.nodesInLos[j] = positionNodes.nodesInLos[j + 1];
+                    positionNodes.nodesInLos[j + 1] = temp;
 
-                    distancesFromBaseToNodes.Item2[j] = distancesFromBaseToNodes.Item2[j + 1];
-                    distancesFromBaseToNodes.Item2[j + 1] = distTemp;
+                    distancesFromBaseToNodes[j] = distancesFromBaseToNodes[j + 1];
+                    distancesFromBaseToNodes[j + 1] = distTemp;
                 }
             }
         }
+
+
+        distancesFromBaseToNodes.Clear();
+
+
+        //calculate distances
+        for (int i = 0; i < positionNodes.nodesInNeither.Count; i++)
+        {
+            distancesFromBaseToNodes.Add(Vector2.SqrMagnitude(positionNodes.nodesInNeither[i].position - enemyPosition.position));
+        }
+
+        //bubble sort from lowest to biggest sqr distance so closer nodes are preffered
+        for (int i = 0; i < positionNodes.nodesInNeither.Count - 1; i++)
+        {
+            for (int j = 0; j < positionNodes.nodesInNeither.Count - 1 - i; j++)
+            {
+                if (distancesFromBaseToNodes[j] > distancesFromBaseToNodes[j + 1])
+                {
+                    Node temp = positionNodes.nodesInNeither[j];
+                    float distTemp = distancesFromBaseToNodes[j];
+
+                    positionNodes.nodesInNeither[j] = positionNodes.nodesInNeither[j + 1];
+                    positionNodes.nodesInNeither[j + 1] = temp;
+
+                    distancesFromBaseToNodes[j] = distancesFromBaseToNodes[j + 1];
+                    distancesFromBaseToNodes[j + 1] = distTemp;
+                }
+            }
+        }
+
 
         return positionNodes;
 
