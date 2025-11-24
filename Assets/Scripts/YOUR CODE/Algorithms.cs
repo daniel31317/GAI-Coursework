@@ -81,6 +81,79 @@ public static class Algorithms
         return GetFoundPath(null);
     }
 
+
+
+    public static List<Node> AStar(Node startNode, Node endNode, Node avoidNode, float avoidDistance)
+    {
+        Profiler.BeginSample("AStar");
+        ResetNodesToDefaualt(nodesToReset);
+        endNode.Reset();
+
+        int visitOrder = 0;
+        List<Node> openNodeList = new List<Node>();
+        
+
+        startNode.onOpenList = true;
+
+        openNodeList.Add(startNode);
+        nodesToReset.Add(startNode);
+
+        while (openNodeList.Count > 0)
+        {
+            Profiler.BeginSample("Sort");
+            openNodeList.Sort();
+            Profiler.EndSample();
+
+            //openNodeList[0] = currentNode
+            openNodeList[0].onOpenList = false;
+            openNodeList[0].onClosedList = true;
+            openNodeList[0].visitOrder = visitOrder++;
+
+            if (openNodeList[0] == endNode)
+            {
+                Profiler.EndSample();
+                return GetFoundPath(endNode);
+            }
+
+            for (int i = 0; i < openNodeList[0].neighbours.Count; i++)
+            {
+                Node childNode = openNodeList[0].neighbours[i];
+                if (!childNode.onClosedList && childNode.SqrMagnitude(avoidNode) >= avoidDistance)
+                {
+                    int g = openNodeList[0].g + CalculateInitialCost(openNodeList[0].position, childNode.position);
+                    int h = ManhattanDistanceHeuristic(childNode.position, endNode.position);
+                    int f = g + h;
+
+                    if (childNode.terrain == Map.Terrain.Mud)
+                    {
+                        f *= 2;
+                    }
+                    else if (childNode.terrain == Map.Terrain.Water)
+                    {
+                        f *= 4;
+                    }
+
+                    if (f <= childNode.f || !childNode.onOpenList)
+                    {
+                        childNode.f = f;
+                        childNode.g = g;
+                        childNode.SetParent(openNodeList[0]);
+                    }
+                    if (!childNode.onOpenList)
+                    {
+                        childNode.onOpenList = true;
+                        openNodeList.Add(childNode);
+                        nodesToReset.Add(childNode);
+                    }
+                }
+            }
+
+            openNodeList.RemoveAt(0);
+        }
+
+        return GetFoundPath(null);
+    }
+
     public static void ResetNodesToDefaualt(List<Node> nodes)
     {
         for (int i = 0; i < nodes.Count; i++)
@@ -363,6 +436,7 @@ public static class Algorithms
 
             if (nodesToSearch.Count > 1)
             {
+                //remove nodes within a certain distance
                 List<Node> nodesToRemove = GetNodesToRemove(nodesToSearch, nodesOfInterest[nodesOfInterest.Count - 1], removeNodesInDistance);
 
                 for (int i = 0; i < nodesToRemove.Count; i++)
@@ -379,28 +453,29 @@ public static class Algorithms
 
     public static NodesOfInterest GetNodesOfInterest(List<Node> nodesToSearch, int removeNodesInDistance, Vector2 losPos, float distance)
     {
-        NodesOfInterest nodes = new NodesOfInterest(new List<Node>(), new List<Node>(), new List<Node>());
+        NodesOfInterest nodes = new NodesOfInterest(new List<Node>(), new List<Node>());
         while (nodesToSearch.Count > 0)
         {
-            bool inLos = IsPositionInLineOfSight(nodesToSearch[0].position, losPos);
-            bool withinRange = Vector2.SqrMagnitude(nodesToSearch[0].position - losPos) < distance * distance;  
-            
-            if (inLos && withinRange)
+            if(Vector2.SqrMagnitude(nodesToSearch[0].position - losPos) < distance * distance)
             {
-                nodes.nodesInLosAndRange.Add(nodesToSearch[0]);
+                nodesToSearch[0].Reset();
+                nodesToSearch.RemoveAt(0);
+                continue;
             }
-            else if(inLos && !withinRange)
+            
+            if(IsPositionInLineOfSight(nodesToSearch[0].position, losPos))
             {
                 nodes.nodesInLos.Add(nodesToSearch[0]);
             }
             else
             {
-                nodes.nodesInNeither.Add(nodesToSearch[0]);
+                nodes.nodesNotLos.Add(nodesToSearch[0]);
             }
-
+            
 
             if (nodesToSearch.Count > 1)
             {
+                //remove nodes within a certain distance
                 List<Node> nodesToRemove = GetNodesToRemove(nodesToSearch, nodesToSearch[0], removeNodesInDistance);
 
                 for (int i = 0; i < nodesToRemove.Count; i++)
@@ -410,13 +485,9 @@ public static class Algorithms
                 }
             }
 
-            if (nodesToSearch.Count > 0)
-            {
-                nodesToSearch[0].Reset();
-                nodesToSearch.RemoveAt(0);
-            }
 
-            
+            nodesToSearch[0].Reset();
+            nodesToSearch.RemoveAt(0);
         }
 
         return nodes;
@@ -431,6 +502,11 @@ public static class Algorithms
         //loop thorugh closed list with current point of interest and anything out of distance add to remove list
         for (int i = 0; i < nodes.Count; i++)
         {
+            if(nodes[i] == rangeNode)
+            {
+                continue;
+            }
+
             if (IsNodeInRange(rangeNode, nodes[i], distance))
             {
                 removeTheseNodes.Add(nodes[i]);

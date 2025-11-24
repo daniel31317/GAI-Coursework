@@ -45,6 +45,12 @@ public class Node : IComparable<Node>
         this.parent = parent;
     }
 
+
+    public float SqrMagnitude(Node other)
+    {
+        return Vector3.SqrMagnitude(this.position - other.position);
+    }
+
     public void Reset()
     {
         parent = null;

@@ -1,0 +1,17 @@
+Make scout wait for assistant 
+
+Add actual enemies
+
+Target multiple enemies then shoot
+
+Moving to another group of enemies
+
+Handle scouts dying 
+
+Fix positioning before taking shot
+
+Change GetPositionsDistanceAwayFromNode to be quicksorted
+
+All accessible nodes on start up
+
+Remove profiler things form code

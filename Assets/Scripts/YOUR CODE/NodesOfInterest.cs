@@ -4,14 +4,12 @@ using UnityEngine;
 
 public struct NodesOfInterest
 {
-    public List<Node> nodesInLosAndRange;
     public List<Node> nodesInLos;
-    public List<Node> nodesInNeither;
+    public List<Node> nodesNotLos;
 
-    public NodesOfInterest(List<Node> losAndRange, List<Node> los, List<Node> neither)
+    public NodesOfInterest(List<Node> los, List<Node> notLos)
     {
-        nodesInLosAndRange = losAndRange;
         nodesInLos = los;
-        nodesInNeither = neither;
+        nodesNotLos = notLos;
     }
 }

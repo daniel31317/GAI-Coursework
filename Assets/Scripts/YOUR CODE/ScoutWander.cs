@@ -31,7 +31,7 @@ public class ScoutWander : SteeringBehaviour
     private void HandleIfAllyNeedsNewNodeToPathfind()
     {
 
-        if(Vector3.SqrMagnitude((Vector3)AllyManager.ScoutManager.tempEnemyLocation.position - transform.position) <= 100 && !returningToBase)
+        if(Vector3.SqrMagnitude((Vector3)AllyManager.ScoutManager.tempEnemyLocation.position - transform.position) <= AllyManager.viewDistance * AllyManager.viewDistance && !returningToBase)
         {
             returningToBase = Algorithms.IsPositionInLineOfSight(transform.position, AllyManager.ScoutManager.tempEnemyLocation.position);
             if (returningToBase)
@@ -79,7 +79,7 @@ public class ScoutWander : SteeringBehaviour
         }
         else if (returningToBase)
         {
-            AllyManager.Instance.FoundEnemyToAttack(AllyManager.ScoutManager.tempEnemyLocation.position);
+            AllyManager.Instance.FoundEnemyToAttack(currentPath, AllyManager.ScoutManager.tempEnemyLocation.position);
         }
     }
 

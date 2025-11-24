@@ -14,6 +14,7 @@ public class AllyManager : MonoBehaviour
     public Node enemyPosition { get; private set; }
 
     private int alliesReadyToAttack = 0;
+    public const int viewDistance = 10;
 
     public Vector3 currentBasePosition { get; private set; }
 
@@ -75,13 +76,16 @@ public class AllyManager : MonoBehaviour
     }
 
     
-    public void FoundEnemyToAttack(Vector2 position)
+    public void FoundEnemyToAttack(List<Node> currentPathToEnemyReverse, Vector2 position)
     {
         alliesReadyToAttack = 0;
         enemyPosition = GridData.Instance.GetNodeAt(position);
         attackEnemies = true;
-        NodesOfInterest movePositions = GetPositionsDistanceAwayFromNode(enemyPosition, 10);
-        
+        NodesOfInterest movePositions = GetPositionsDistanceAwayFromNode(enemyPosition, viewDistance);
+
+        currentPathToEnemyReverse.Reverse();
+
+
 
         for (int i = 0; i < GameData.Instance.allies.Count; i++)
         {
@@ -96,51 +100,58 @@ public class AllyManager : MonoBehaviour
 
             List<Node> currentPathToEnemy = new List<Node>();
 
-            bool validPath = false;
-
             Vector3 blockPos = Vector3.zero;
 
-            if (movePositions.nodesInLosAndRange.Count > 0)
+            List<Node> additionalPathFind = null;
+            while(movePositions.nodesInLos.Count > 0 && additionalPathFind == null)
             {
-                while (!validPath && movePositions.nodesInLosAndRange.Count > 0)
+                int closestNodeOnPathIndex = GetClosestNodeOnPathIndex(currentPathToEnemyReverse, movePositions.nodesInLos[0]);
+                for (int j = 0; j < closestNodeOnPathIndex; j++)
                 {
-                    currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(((AllyAgent)GameData.Instance.allies[i]).transform.position), movePositions.nodesInLosAndRange[0]);
-                    validPath = CheckPathDoesntGoWithinRangeOfEnemy(currentPathToEnemy, 10);
-                    if (validPath)
-                    {
-                        blockPos = (Vector3)movePositions.nodesInLosAndRange[0].position;
-                    }
-                    movePositions.nodesInLosAndRange.RemoveAt(0);
-                    
-                }                             
-            }
-            if(movePositions.nodesInLos.Count > 0 && !validPath)
-            {
-                while (!validPath && movePositions.nodesInLos.Count > 0)
-                {
-                    currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(((AllyAgent)GameData.Instance.allies[i]).transform.position), movePositions.nodesInLos[0]);
-                    validPath = CheckPathDoesntGoWithinRangeOfEnemy(currentPathToEnemy, 10);
-                    if(validPath)
-                    {
-                        blockPos = (Vector3)movePositions.nodesInLos[0].position;
-                    }
-                    movePositions.nodesInLos.RemoveAt(0);                   
+                    currentPathToEnemy.Add(currentPathToEnemyReverse[j]);
                 }
-            }
-            if (movePositions.nodesInNeither.Count > 0 && !validPath)
-            {
-                while (!validPath && movePositions.nodesInNeither.Count > 0)
+
+                additionalPathFind = Algorithms.AStar(currentPathToEnemyReverse[closestNodeOnPathIndex], movePositions.nodesInLos[0], enemyPosition, viewDistance);
+                blockPos = (Vector3)movePositions.nodesInLos[0].position;
+                movePositions.nodesInLos.RemoveAt(0);
+
+                if (additionalPathFind == null)
                 {
-                    currentPathToEnemy = Algorithms.AStar(GridData.Instance.GetNodeAt(((AllyAgent)GameData.Instance.allies[i]).transform.position), movePositions.nodesInNeither[0]);
-                    validPath = CheckPathDoesntGoWithinRangeOfEnemy(currentPathToEnemy, 10);
-                    if (validPath)
-                    {
-                        blockPos = (Vector3)movePositions.nodesInNeither[0].position;
-                    }
-                    movePositions.nodesInNeither.RemoveAt(0);
+                    continue;
                 }
+
+                for (int j = 0; j < additionalPathFind.Count; j++)
+                {
+                    currentPathToEnemy.Add(additionalPathFind[j]);
+                }
+
+                       
             }
 
+            while (movePositions.nodesNotLos.Count > 0 && additionalPathFind == null)
+            {
+                int closestNodeOnPathIndex = GetClosestNodeOnPathIndex(currentPathToEnemyReverse, movePositions.nodesNotLos[0]);
+                for (int j = 0; j < closestNodeOnPathIndex; j++)
+                {
+                    currentPathToEnemy.Add(currentPathToEnemyReverse[j]);
+                }
+
+                additionalPathFind = Algorithms.AStar(currentPathToEnemyReverse[closestNodeOnPathIndex], movePositions.nodesNotLos[0], enemyPosition, viewDistance);
+                blockPos = (Vector3)movePositions.nodesNotLos[0].position;
+                movePositions.nodesNotLos.RemoveAt(0);
+
+                if (additionalPathFind == null)
+                {
+                    continue;
+                }
+
+                for (int j = 0; j < additionalPathFind.Count; j++)
+                {
+                    currentPathToEnemy.Add(additionalPathFind[j]);
+                }
+
+                
+            }
 
 
 
@@ -161,36 +172,6 @@ public class AllyManager : MonoBehaviour
         NodesOfInterest positionNodes = Algorithms.GetNodesOfInterest(allNodes, 2, node.position, distance);
 
         List<float> distancesFromBaseToNodes = new List<float>();
-
-        //calculate distances
-        for(int i = 0; i < positionNodes.nodesInLosAndRange.Count; i++)
-        {
-            distancesFromBaseToNodes.Add(Vector2.SqrMagnitude(positionNodes.nodesInLosAndRange[i].position - enemyPosition.position));
-        }
-
-        //bubble sort from lowest to biggest sqr distance so closer nodes are preffered
-        for (int i = 0; i < positionNodes.nodesInLosAndRange.Count - 1; i++)
-        {
-            for (int j = 0; j < positionNodes.nodesInLosAndRange.Count - 1 - i; j++)
-            {
-                if (distancesFromBaseToNodes[j] > distancesFromBaseToNodes[j + 1])
-                {
-                    Node temp = positionNodes.nodesInLosAndRange[j];
-                    float distTemp = distancesFromBaseToNodes[j];
-
-                    positionNodes.nodesInLosAndRange[j] = positionNodes.nodesInLosAndRange[j + 1];
-                    positionNodes.nodesInLosAndRange[j + 1] = temp;
-
-                    distancesFromBaseToNodes[j] = distancesFromBaseToNodes[j + 1];
-                    distancesFromBaseToNodes[j + 1] = distTemp;
-                }
-            }
-        }
-
-
-        distancesFromBaseToNodes.Clear();
-
-
 
         //calculate distances
         for (int i = 0; i < positionNodes.nodesInLos.Count; i++)
@@ -222,23 +203,23 @@ public class AllyManager : MonoBehaviour
 
 
         //calculate distances
-        for (int i = 0; i < positionNodes.nodesInNeither.Count; i++)
+        for (int i = 0; i < positionNodes.nodesNotLos.Count; i++)
         {
-            distancesFromBaseToNodes.Add(Vector2.SqrMagnitude(positionNodes.nodesInNeither[i].position - enemyPosition.position));
+            distancesFromBaseToNodes.Add(Vector2.SqrMagnitude(positionNodes.nodesNotLos[i].position - enemyPosition.position));
         }
 
         //bubble sort from lowest to biggest sqr distance so closer nodes are preffered
-        for (int i = 0; i < positionNodes.nodesInNeither.Count - 1; i++)
+        for (int i = 0; i < positionNodes.nodesNotLos.Count - 1; i++)
         {
-            for (int j = 0; j < positionNodes.nodesInNeither.Count - 1 - i; j++)
+            for (int j = 0; j < positionNodes.nodesNotLos.Count - 1 - i; j++)
             {
                 if (distancesFromBaseToNodes[j] > distancesFromBaseToNodes[j + 1])
                 {
-                    Node temp = positionNodes.nodesInNeither[j];
+                    Node temp = positionNodes.nodesNotLos[j];
                     float distTemp = distancesFromBaseToNodes[j];
 
-                    positionNodes.nodesInNeither[j] = positionNodes.nodesInNeither[j + 1];
-                    positionNodes.nodesInNeither[j + 1] = temp;
+                    positionNodes.nodesNotLos[j] = positionNodes.nodesNotLos[j + 1];
+                    positionNodes.nodesNotLos[j + 1] = temp;
 
                     distancesFromBaseToNodes[j] = distancesFromBaseToNodes[j + 1];
                     distancesFromBaseToNodes[j + 1] = distTemp;
@@ -252,21 +233,22 @@ public class AllyManager : MonoBehaviour
     }
 
 
-    private bool CheckPathDoesntGoWithinRangeOfEnemy(List<Node> path, float distance)
+
+    private int GetClosestNodeOnPathIndex(List<Node> path, Node targetNode)
     {
-        for (int i = 0; i < path.Count; i++)
+        float shortestDistance = path[0].SqrMagnitude(targetNode);
+        int index = 0;
+        for (int j = 1; j < path.Count; j++)
         {
-            if(Vector2.SqrMagnitude(path[i].position - enemyPosition.position) < distance * distance)
+            float currentDistance = path[j].SqrMagnitude(targetNode);
+            if (currentDistance < shortestDistance)
             {
-                return false;
+                shortestDistance = currentDistance;
+                index = j;
             }
         }
-        return true;
+        return index;
     }
-
-
-
-
 
 
     public void AllyInPositionToAttack()
