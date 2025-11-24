@@ -406,6 +406,12 @@ public static class Algorithms
 
             nodesToReset.Add(currentNode);
 
+            //if we have more than 1000 nodes to look at that is probably more than enough
+            //just better for later steps not to loop though for example 8000 nodes where most of them will be useless
+            if (closedList.Count > 1000)
+            {
+                return closedList;
+            }
 
             for (int i = 0; i < currentNode.neighbours.Count; i++)
             {
