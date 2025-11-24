@@ -27,7 +27,9 @@ public static class Algorithms
 
         while (openNodeList.Count > 0)
         {
+            Profiler.BeginSample("Sort");
             openNodeList.Sort();
+            Profiler.EndSample();
 
             //openNodeList[0] = currentNode
             openNodeList[0].onOpenList = false;
@@ -62,12 +64,6 @@ public static class Algorithms
                     {
                         childNode.f = f;
                         childNode.g = g;
-
-                        //avoid setting the parent of the child that's parent is the child to avoid infinite loops when getting the found path
-                        /*if (childNode != openNodeList[0].parent)
-                        {
-                            childNode.SetParent(openNodeList[0]);
-                        }*/
                         childNode.SetParent(openNodeList[0]);
                     }
                     if (!childNode.onOpenList)
@@ -87,7 +83,7 @@ public static class Algorithms
 
     public static void ResetNodesToDefaualt(List<Node> nodes)
     {
-        for(int i = 0; i < nodes.Count; i++)
+        for (int i = 0; i < nodes.Count; i++)
         {
             nodes[i].Reset();
         }
