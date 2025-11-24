@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 public static class Algorithms 
 {
@@ -11,6 +12,7 @@ public static class Algorithms
     #region pathfinding
     public static List<Node> AStar(Node startNode, Node endNode)
     {
+        Profiler.BeginSample("AStar");
         ResetNodesToDefaualt(nodesToReset);
         endNode.Reset();
 
@@ -25,19 +27,7 @@ public static class Algorithms
 
         while (openNodeList.Count > 0)
         {
-            //bubble sort from lowest to biggest f
-            for (int i = 0; i < openNodeList.Count - 1; i++)
-            {
-                for (int j = 0; j < openNodeList.Count - 1 - i; j++)
-                {
-                    if (openNodeList[j].f > openNodeList[j + 1].f)
-                    {
-                        Node temp = openNodeList[j];
-                        openNodeList[j] = openNodeList[j + 1];
-                        openNodeList[j + 1] = temp;
-                    }
-                }
-            }
+            openNodeList.Sort();
 
             //openNodeList[0] = currentNode
             openNodeList[0].onOpenList = false;
@@ -45,7 +35,8 @@ public static class Algorithms
             openNodeList[0].visitOrder = visitOrder++;
 
             if (openNodeList[0] == endNode)
-            {          
+            {
+                Profiler.EndSample();
                 return GetFoundPath(endNode);
             }
 
@@ -294,20 +285,20 @@ public static class Algorithms
             nodesToReset.Add(currentNode);
 
 
-            foreach (Node childNode in currentNode.neighbours)
+            for(int i = 0; i < currentNode.neighbours.Count; i++)
             {
-                if (!childNode.onClosedList)
+                if (!currentNode.neighbours[i].onClosedList)
                 {
-                    int f = currentNode.f + CalculateInitialCostNoHorizontal(currentNode.position, childNode.position);
-                    if (f <= childNode.f || !childNode.onOpenList)
+                    int f = currentNode.f + CalculateInitialCostNoHorizontal(currentNode.position, currentNode.neighbours[i].position);
+                    if (f <= currentNode.neighbours[i].f || !currentNode.neighbours[i].onOpenList)
                     {
-                        childNode.f = f;
+                        currentNode.neighbours[i].f = f;
                     }
-                    if (!childNode.onOpenList)
+                    if (!currentNode.neighbours[i].onOpenList)
                     {
-                        childNode.SetParent(currentNode);
-                        childNode.onOpenList = true;
-                        openList.Add(childNode);
+                        currentNode.neighbours[i].SetParent(currentNode);
+                        currentNode.neighbours[i].onOpenList = true;
+                        openList.Add(currentNode.neighbours[i]);
                     }
                 }
             }
@@ -316,7 +307,7 @@ public static class Algorithms
         return closedList;
     }
 
-    public static List<Node> ScoreAllAccessibleNodes(Node startNode, int minDistance)
+    public static List<Node> FIndAllAccesableNodes(Node startNode, int minDistance)
     {
         ResetNodesToDefaualt(nodesToReset);
 
@@ -344,21 +335,13 @@ public static class Algorithms
             nodesToReset.Add(currentNode);
 
 
-            foreach (Node childNode in currentNode.neighbours)
+            for (int i = 0; i < currentNode.neighbours.Count; i++)
             {
-                if (!childNode.onClosedList)
+                if (!currentNode.neighbours[i].onClosedList && !currentNode.neighbours[i].onOpenList)
                 {
-                    int f = currentNode.f + CalculateInitialCostNoHorizontal(currentNode.position, childNode.position);
-                    if (f <= childNode.f || !childNode.onOpenList)
-                    {
-                        childNode.f = f;
-                    }
-                    if (!childNode.onOpenList)
-                    {
-                        childNode.SetParent(currentNode);
-                        childNode.onOpenList = true;
-                        openList.Add(childNode);
-                    }
+                    currentNode.neighbours[i].SetParent(currentNode);
+                    currentNode.neighbours[i].onOpenList = true;
+                    openList.Add(currentNode.neighbours[i]);
                 }
             }
         }
@@ -431,8 +414,13 @@ public static class Algorithms
                 }
             }
 
-            nodesToSearch[0].Reset();
-            nodesToSearch.RemoveAt(0);
+            if (nodesToSearch.Count > 0)
+            {
+                nodesToSearch[0].Reset();
+                nodesToSearch.RemoveAt(0);
+            }
+
+            
         }
 
         return nodes;

@@ -157,7 +157,7 @@ public class AllyManager : MonoBehaviour
 
     private NodesOfInterest GetPositionsDistanceAwayFromNode(Node node, int distance)
     {
-        List<Node> allNodes = Algorithms.ScoreAllAccessibleNodes(node, distance);
+        List<Node> allNodes = Algorithms.FIndAllAccesableNodes(node, distance);
         NodesOfInterest positionNodes = Algorithms.GetNodesOfInterest(allNodes, 2, node.position, distance);
 
         List<float> distancesFromBaseToNodes = new List<float>();

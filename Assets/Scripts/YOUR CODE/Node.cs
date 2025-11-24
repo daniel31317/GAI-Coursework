@@ -1,8 +1,9 @@
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Node
+public class Node : IComparable<Node>
 {
     public Vector2 position { get; private set; }
     public Map.Terrain terrain { get; private set; }
@@ -54,6 +55,20 @@ public class Node
         g = 0;
         h = 0;
 
-}
+    }
+
+    public int CompareTo(Node other)
+    {
+        if(f < other.f)
+        {
+            return -1;
+        }
+        else if(f > other.f)
+        {
+            return 1;
+        }
+        return 0;
+    }
+
 
 }
