@@ -12,7 +12,6 @@ public static class Algorithms
     #region pathfinding
     public static List<Node> AStar(Node startNode, Node endNode)
     {
-        Profiler.BeginSample("AStar");
         ResetNodesToDefaualt(nodesToReset);
         endNode.Reset();
 
@@ -27,9 +26,7 @@ public static class Algorithms
 
         while (openNodeList.Count > 0)
         {
-            Profiler.BeginSample("Sort");
             openNodeList.Sort();
-            Profiler.EndSample();
 
             //openNodeList[0] = currentNode
             openNodeList[0].onOpenList = false;
@@ -38,7 +35,6 @@ public static class Algorithms
 
             if (openNodeList[0] == endNode)
             {
-                Profiler.EndSample();
                 return GetFoundPath(endNode);
             }
 
@@ -85,7 +81,6 @@ public static class Algorithms
 
     public static List<Node> AStar(Node startNode, Node endNode, Node avoidNode, float avoidDistance)
     {
-        Profiler.BeginSample("AStar");
         ResetNodesToDefaualt(nodesToReset);
         endNode.Reset();
 
@@ -100,9 +95,7 @@ public static class Algorithms
 
         while (openNodeList.Count > 0)
         {
-            Profiler.BeginSample("Sort");
             openNodeList.Sort();
-            Profiler.EndSample();
 
             //openNodeList[0] = currentNode
             openNodeList[0].onOpenList = false;
@@ -111,14 +104,13 @@ public static class Algorithms
 
             if (openNodeList[0] == endNode)
             {
-                Profiler.EndSample();
                 return GetFoundPath(endNode);
             }
 
             for (int i = 0; i < openNodeList[0].neighbours.Count; i++)
             {
                 Node childNode = openNodeList[0].neighbours[i];
-                if (!childNode.onClosedList && childNode.SqrMagnitude(avoidNode) >= avoidDistance)
+                if (!childNode.onClosedList && childNode.SqrMagnitude(avoidNode) >= avoidDistance * avoidDistance)
                 {
                     int g = openNodeList[0].g + CalculateInitialCost(openNodeList[0].position, childNode.position);
                     int h = ManhattanDistanceHeuristic(childNode.position, endNode.position);

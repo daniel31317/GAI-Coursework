@@ -81,7 +81,7 @@ public class AllyManager : MonoBehaviour
         alliesReadyToAttack = 0;
         enemyPosition = GridData.Instance.GetNodeAt(position);
         attackEnemies = true;
-        NodesOfInterest movePositions = GetPositionsDistanceAwayFromNode(enemyPosition, viewDistance);
+        NodesOfInterest movePositions = GetPositionsDistanceAwayFromNode(enemyPosition);
 
         currentPathToEnemyReverse.Reverse();
 
@@ -105,6 +105,7 @@ public class AllyManager : MonoBehaviour
             List<Node> additionalPathFind = null;
             while(movePositions.nodesInLos.Count > 0 && additionalPathFind == null)
             {
+                currentPathToEnemy.Clear();
                 int closestNodeOnPathIndex = GetClosestNodeOnPathIndex(currentPathToEnemyReverse, movePositions.nodesInLos[0]);
                 for (int j = 0; j < closestNodeOnPathIndex; j++)
                 {
@@ -130,6 +131,7 @@ public class AllyManager : MonoBehaviour
 
             while (movePositions.nodesNotLos.Count > 0 && additionalPathFind == null)
             {
+                currentPathToEnemy.Clear();
                 int closestNodeOnPathIndex = GetClosestNodeOnPathIndex(currentPathToEnemyReverse, movePositions.nodesNotLos[0]);
                 for (int j = 0; j < closestNodeOnPathIndex; j++)
                 {
@@ -166,80 +168,42 @@ public class AllyManager : MonoBehaviour
     }
 
 
-    private NodesOfInterest GetPositionsDistanceAwayFromNode(Node node, int distance)
+    private NodesOfInterest GetPositionsDistanceAwayFromNode(Node node)
     {
-        List<Node> allNodes = Algorithms.FIndAllAccesableNodes(node, distance);
-        NodesOfInterest positionNodes = Algorithms.GetNodesOfInterest(allNodes, 2, node.position, distance);
+        NodesOfInterest positionNodes = Algorithms.GetNodesOfInterest(Algorithms.FIndAllAccesableNodes(node, viewDistance), 2, node.position, viewDistance);
 
-        List<float> distancesFromBaseToNodes = new List<float>();
-
-        //calculate distances
-        for (int i = 0; i < positionNodes.nodesInLos.Count; i++)
+        //sort from closest to furthest for both lists
+        positionNodes.nodesInLos.Sort((x, y) =>
         {
-            distancesFromBaseToNodes.Add(Vector2.SqrMagnitude(positionNodes.nodesInLos[i].position - enemyPosition.position));
-        }
+            float xNodeDist = Vector2.SqrMagnitude(x.position - enemyPosition.position);
+            float yNodeDist = Vector2.SqrMagnitude(y.position - enemyPosition.position);
+            return xNodeDist.CompareTo(yNodeDist);
+        });
 
-        //bubble sort from lowest to biggest sqr distance so closer nodes are preffered
-        for (int i = 0; i < positionNodes.nodesInLos.Count - 1; i++)
+
+        positionNodes.nodesNotLos.Sort((x, y) =>
         {
-            for (int j = 0; j < positionNodes.nodesInLos.Count - 1 - i; j++)
-            {
-                if (distancesFromBaseToNodes[j] > distancesFromBaseToNodes[j + 1])
-                {
-                    Node temp = positionNodes.nodesInLos[j];
-                    float distTemp = distancesFromBaseToNodes[j];
-
-                    positionNodes.nodesInLos[j] = positionNodes.nodesInLos[j + 1];
-                    positionNodes.nodesInLos[j + 1] = temp;
-
-                    distancesFromBaseToNodes[j] = distancesFromBaseToNodes[j + 1];
-                    distancesFromBaseToNodes[j + 1] = distTemp;
-                }
-            }
-        }
-
-
-        distancesFromBaseToNodes.Clear();
-
-
-        //calculate distances
-        for (int i = 0; i < positionNodes.nodesNotLos.Count; i++)
-        {
-            distancesFromBaseToNodes.Add(Vector2.SqrMagnitude(positionNodes.nodesNotLos[i].position - enemyPosition.position));
-        }
-
-        //bubble sort from lowest to biggest sqr distance so closer nodes are preffered
-        for (int i = 0; i < positionNodes.nodesNotLos.Count - 1; i++)
-        {
-            for (int j = 0; j < positionNodes.nodesNotLos.Count - 1 - i; j++)
-            {
-                if (distancesFromBaseToNodes[j] > distancesFromBaseToNodes[j + 1])
-                {
-                    Node temp = positionNodes.nodesNotLos[j];
-                    float distTemp = distancesFromBaseToNodes[j];
-
-                    positionNodes.nodesNotLos[j] = positionNodes.nodesNotLos[j + 1];
-                    positionNodes.nodesNotLos[j + 1] = temp;
-
-                    distancesFromBaseToNodes[j] = distancesFromBaseToNodes[j + 1];
-                    distancesFromBaseToNodes[j + 1] = distTemp;
-                }
-            }
-        }
+            float xNodeDist = Vector2.SqrMagnitude(x.position - enemyPosition.position);
+            float yNodeDist = Vector2.SqrMagnitude(y.position - enemyPosition.position);
+            return xNodeDist.CompareTo(yNodeDist);
+        });
 
 
         return positionNodes;
-
     }
 
 
 
     private int GetClosestNodeOnPathIndex(List<Node> path, Node targetNode)
     {
-        float shortestDistance = path[0].SqrMagnitude(targetNode);
+        float shortestDistance = 100000000;
         int index = 0;
-        for (int j = 1; j < path.Count; j++)
+        for (int j = 0; j < path.Count; j++)
         {
+            if (enemyPosition.SqrMagnitude(path[j]) < viewDistance * viewDistance)
+            {
+                continue;
+            }
             float currentDistance = path[j].SqrMagnitude(targetNode);
             if (currentDistance < shortestDistance)
             {
