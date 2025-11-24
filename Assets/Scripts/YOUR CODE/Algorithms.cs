@@ -79,9 +79,14 @@ public static class Algorithms
 
 
 
-    public static List<Node> AStar(Node startNode, Node endNode, Node avoidNode, float avoidDistance)
+    public static List<Node> AStar(Node startNode, Node endNode, Node avoidNode, float avoidDistance, bool hasThresHold)
     {
+        Profiler.BeginSample("A star algo");
         ResetNodesToDefaualt(nodesToReset);
+
+        //since we dont path find around enemies but we are close by so it shouldn't take that long to get it so skip if we reach this thresh hold
+        const int maxIterations = 200; 
+
         endNode.Reset();
 
         int visitOrder = 0;
@@ -104,7 +109,13 @@ public static class Algorithms
 
             if (openNodeList[0] == endNode)
             {
+                Profiler.EndSample();
                 return GetFoundPath(endNode);
+            }
+
+            if(hasThresHold && visitOrder > maxIterations)
+            {
+                return GetFoundPath(null);
             }
 
             for (int i = 0; i < openNodeList[0].neighbours.Count; i++)
@@ -454,7 +465,7 @@ public static class Algorithms
                 nodesToSearch.RemoveAt(0);
                 continue;
             }
-            
+
             if(IsPositionInLineOfSight(nodesToSearch[0].position, losPos))
             {
                 nodes.nodesInLos.Add(nodesToSearch[0]);
@@ -463,23 +474,21 @@ public static class Algorithms
             {
                 nodes.nodesNotLos.Add(nodesToSearch[0]);
             }
-            
 
+            nodesToReset.Add(nodesToSearch[0]);
+
+            Profiler.BeginSample("Remove Nodes");
             if (nodesToSearch.Count > 1)
             {
-                //remove nodes within a certain distance
-                List<Node> nodesToRemove = GetNodesToRemove(nodesToSearch, nodesToSearch[0], removeNodesInDistance);
-
-                for (int i = 0; i < nodesToRemove.Count; i++)
-                {
-                    nodesToSearch.Remove(nodesToRemove[i]);
-                    nodesToRemove[i].Reset();
-                }
+                Node referenceNode = nodesToSearch[0];
+                nodesToSearch.RemoveAll(n => IsNodeInRange(referenceNode, n, removeNodesInDistance));
             }
+            Profiler.EndSample();
 
-
-            nodesToSearch[0].Reset();
-            nodesToSearch.RemoveAt(0);
+            if(nodes.nodesInLos.Count > 100)
+            {
+                return nodes;
+            }
         }
 
         return nodes;

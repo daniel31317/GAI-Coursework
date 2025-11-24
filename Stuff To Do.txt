@@ -11,3 +11,7 @@ Handle scouts dying
 Fix positioning before taking shot
 
 All accessible nodes on start up
+
+Add idle to allies waiting
+
+Remove profiler

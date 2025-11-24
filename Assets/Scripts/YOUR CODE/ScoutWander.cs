@@ -87,7 +87,15 @@ public class ScoutWander : SteeringBehaviour
     private void PathfindToNewNode()
     {
         //pathfind to node
-        currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), currentClosestNode);
+        if(!returningToBase)
+        {
+            currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), currentClosestNode);
+        }
+        else
+        {
+            currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), currentClosestNode, AllyManager.ScoutManager.tempEnemyLocation, AllyManager.viewDistance, false);
+        }
+
 
         //if we have a path
         if (currentPath != null && currentPath.Count > 1)

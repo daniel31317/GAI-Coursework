@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 public class AllyManager : MonoBehaviour
 {
@@ -81,12 +82,16 @@ public class AllyManager : MonoBehaviour
         alliesReadyToAttack = 0;
         enemyPosition = GridData.Instance.GetNodeAt(position);
         attackEnemies = true;
+
+
+        Profiler.BeginSample("GetPositionsDistanceAwayFromNode");
         NodesOfInterest movePositions = GetPositionsDistanceAwayFromNode(enemyPosition);
+        Profiler.EndSample();
 
         currentPathToEnemyReverse.Reverse();
 
 
-
+        Profiler.BeginSample("For loop");
         for (int i = 0; i < GameData.Instance.allies.Count; i++)
         {
             if(((AllyAgent)GameData.Instance.allies[i]).agentRole == AllyAgentRole.LeadScout)
@@ -103,6 +108,8 @@ public class AllyManager : MonoBehaviour
             Vector3 blockPos = Vector3.zero;
 
             List<Node> additionalPathFind = null;
+
+            Profiler.BeginSample("Selecting Node and path");
             while(movePositions.nodesInLos.Count > 0 && additionalPathFind == null)
             {
                 currentPathToEnemy.Clear();
@@ -112,7 +119,9 @@ public class AllyManager : MonoBehaviour
                     currentPathToEnemy.Add(currentPathToEnemyReverse[j]);
                 }
 
-                additionalPathFind = Algorithms.AStar(currentPathToEnemyReverse[closestNodeOnPathIndex], movePositions.nodesInLos[0], enemyPosition, viewDistance);
+                Profiler.BeginSample("A star");
+                additionalPathFind = Algorithms.AStar(currentPathToEnemyReverse[closestNodeOnPathIndex], movePositions.nodesInLos[0], enemyPosition, viewDistance, true);
+                Profiler.EndSample();
                 blockPos = (Vector3)movePositions.nodesInLos[0].position;
                 movePositions.nodesInLos.RemoveAt(0);
 
@@ -138,7 +147,10 @@ public class AllyManager : MonoBehaviour
                     currentPathToEnemy.Add(currentPathToEnemyReverse[j]);
                 }
 
-                additionalPathFind = Algorithms.AStar(currentPathToEnemyReverse[closestNodeOnPathIndex], movePositions.nodesNotLos[0], enemyPosition, viewDistance);
+                Profiler.BeginSample("A star");
+                additionalPathFind = Algorithms.AStar(currentPathToEnemyReverse[closestNodeOnPathIndex], movePositions.nodesNotLos[0], enemyPosition, viewDistance, true);
+                Profiler.EndSample();
+
                 blockPos = (Vector3)movePositions.nodesNotLos[0].position;
                 movePositions.nodesNotLos.RemoveAt(0);
 
@@ -154,7 +166,7 @@ public class AllyManager : MonoBehaviour
 
                 
             }
-
+            Profiler.EndSample();
 
 
             Vector3 offset = new Vector3(0.5f, 0.5f, 1f);
@@ -165,13 +177,23 @@ public class AllyManager : MonoBehaviour
             ((AllyAgent)GameData.Instance.allies[i]).GetComponent<RunToLocatedEnemy>().enabled = true;
             ((AllyAgent)GameData.Instance.allies[i]).GetComponent<RunToLocatedEnemy>().SetCurrentPath(currentPathToEnemy);
         }
+
+
+        Profiler.EndSample();
+
+
     }
 
 
     private NodesOfInterest GetPositionsDistanceAwayFromNode(Node node)
     {
+        Profiler.BeginSample("GetPositionsDistanceAwayFromNode");
+        Profiler.BeginSample("Get Nodes");
         NodesOfInterest positionNodes = Algorithms.GetNodesOfInterest(Algorithms.FIndAllAccesableNodes(node, viewDistance), 2, node.position, viewDistance);
+        Profiler.EndSample();
 
+
+        Profiler.BeginSample("First sort");
         //sort from closest to furthest for both lists
         positionNodes.nodesInLos.Sort((x, y) =>
         {
@@ -179,8 +201,9 @@ public class AllyManager : MonoBehaviour
             float yNodeDist = Vector2.SqrMagnitude(y.position - enemyPosition.position);
             return xNodeDist.CompareTo(yNodeDist);
         });
+        Profiler.EndSample();
 
-
+        Profiler.BeginSample("Second Loop");
         positionNodes.nodesNotLos.Sort((x, y) =>
         {
             float xNodeDist = Vector2.SqrMagnitude(x.position - enemyPosition.position);
@@ -188,7 +211,9 @@ public class AllyManager : MonoBehaviour
             return xNodeDist.CompareTo(yNodeDist);
         });
 
+        Profiler.EndSample();
 
+        Profiler.EndSample();   
         return positionNodes;
     }
 
