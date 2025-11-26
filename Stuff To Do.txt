@@ -1,5 +1,3 @@
-Make scout wait for assistant 
-
 Handle ally being stuck
 
 Add actual enemies
@@ -10,10 +8,8 @@ Moving to another group of enemies
 
 Handle scouts dying 
 
-All accessible nodes on start up
-
 Add idle to allies waiting
 
 Remove profiler
 
-Simplify things such as viewDistance x viewDistance to be stored as a variable
+Comment

@@ -16,6 +16,7 @@ public class AllyManager : MonoBehaviour
 
     private int alliesReadyToAttack = 0;
     public const int viewDistance = 10;
+    public const int viewDistanceSqr = 100;
 
     public Vector3 currentBasePosition { get; private set; }
 

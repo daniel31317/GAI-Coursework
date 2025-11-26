@@ -45,7 +45,7 @@ public class ScoutLeader : SteeringBehaviour
     private void HandleIfAllyNeedsNewNodeToPathfind()
     {
 
-        if(Vector3.SqrMagnitude((Vector3)AllyManager.ScoutManager.tempEnemyLocation.position - transform.position) <= AllyManager.viewDistance * AllyManager.viewDistance && !returningToBase)
+        if(Vector3.SqrMagnitude((Vector3)AllyManager.ScoutManager.tempEnemyLocation.position - transform.position) <= AllyManager.viewDistanceSqr && !returningToBase)
         {
             returningToBase = Algorithms.IsPositionInLineOfSight(transform.position, AllyManager.ScoutManager.tempEnemyLocation.position);
             if (returningToBase)

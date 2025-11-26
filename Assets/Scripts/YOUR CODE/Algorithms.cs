@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -86,6 +87,7 @@ public static class Algorithms
 
         //since we dont path find around enemies but we are close by so it shouldn't take that long to get it so skip if we reach this thresh hold
         const int maxIterations = 200; 
+        float avoidDistanceSqr = avoidDistance * avoidDistance; 
 
         endNode.Reset();
 
@@ -137,7 +139,7 @@ public static class Algorithms
                     }
 
                     //avoid going in range of enemy but still pathfind if needed
-                    if (childNode.SqrMagnitude(avoidNode) < avoidDistance * avoidDistance)
+                    if (childNode.SqrMagnitude(avoidNode) < avoidDistanceSqr)
                     {
                         f *= 1000;
                     }
@@ -388,6 +390,8 @@ public static class Algorithms
     {
         ResetNodesToDefaualt(nodesToReset);
 
+        int minDistanceSqr = minDistance * minDistance;
+
         List<Node> closedList = new List<Node>();
         List<Node> openList = new List<Node>();
 
@@ -404,7 +408,7 @@ public static class Algorithms
             currentNode.onClosedList = true;
 
             float distanceSqrd = Vector3.SqrMagnitude(startNode.position - currentNode.position);
-            if (distanceSqrd >= minDistance * minDistance)
+            if (distanceSqrd >= minDistanceSqr)
             {
                 closedList.Add(currentNode);
             }
@@ -468,9 +472,12 @@ public static class Algorithms
     public static NodesOfInterest GetNodesOfInterest(List<Node> nodesToSearch, int removeNodesInDistance, Vector2 losPos, float distance)
     {
         NodesOfInterest nodes = new NodesOfInterest(new List<Node>(), new List<Node>());
+
+        float distanceSqr = distance * distance;
+
         while (nodesToSearch.Count > 0)
         {
-            if(Vector2.SqrMagnitude(nodesToSearch[0].position - losPos) < distance * distance)
+            if(Vector2.SqrMagnitude(nodesToSearch[0].position - losPos) < distanceSqr)
             {
                 nodesToSearch[0].Reset();
                 nodesToSearch.RemoveAt(0);
