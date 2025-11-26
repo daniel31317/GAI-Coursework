@@ -188,7 +188,7 @@ public class AllyManager : MonoBehaviour
     private NodesOfInterest GetPositionsDistanceAwayFromNode(Node node)
     {
         Profiler.BeginSample("Get Nodes");
-        NodesOfInterest positionNodes = Algorithms.GetNodesOfInterest(Algorithms.FIndAllAccesableNodes(node, viewDistance), 2, node.position, viewDistance);
+        NodesOfInterest positionNodes = Algorithms.GetNodesOfInterest(Algorithms.FindAllAccesableNodes(node, viewDistance), 2, node.position, viewDistance);
         Profiler.EndSample();
 
 

@@ -384,7 +384,7 @@ public static class Algorithms
         return closedList;
     }
 
-    public static List<Node> FIndAllAccesableNodes(Node startNode, int minDistance)
+    public static List<Node> FindAllAccesableNodes(Node startNode, int minDistance)
     {
         ResetNodesToDefaualt(nodesToReset);
 

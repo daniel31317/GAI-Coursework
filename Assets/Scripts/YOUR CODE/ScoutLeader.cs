@@ -25,7 +25,7 @@ public class ScoutLeader : SteeringBehaviour
 
         scoutCatchingUp = Vector3.SqrMagnitude(transform.position - followerScout.transform.position) >= (AllyManager.viewDistance / 2) * (AllyManager.viewDistance / 2);
 
-
+        //if scout has fallen behind wait for it to catch up by it pathfinding
         if (scoutCatchingUp)
         {
             desiredVelocity /= 10000f;

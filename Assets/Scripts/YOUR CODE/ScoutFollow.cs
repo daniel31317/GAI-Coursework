@@ -37,6 +37,8 @@ public class ScoutFollow : SteeringBehaviour
         currentTargetPos = targetPos;
     }
 
+
+    //pathfind to leader scout if this scout has fallen too far behind
     public void CatchUpToScout(ScoutLeader leader)
     {
         catchingUp = true;
@@ -48,7 +50,7 @@ public class ScoutFollow : SteeringBehaviour
 
 
 
-
+    //handles setting the current target position on the path for the scout follower
     private void HandleCatchingUpToScoutLeaderPathfinding()
     {
         if (currentPathIndex < currentPath.Count - 1)
