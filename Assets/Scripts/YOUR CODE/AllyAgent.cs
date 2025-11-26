@@ -35,7 +35,7 @@ public class AllyAgent : SteeringAgent
                 }
                 break;
 			case AllyAgentRole.LeadScout:
-                if (GetComponent<ScoutWander>().enabled)
+                if (GetComponent<ScoutLeader>().enabled)
                 {
                     base.UpdateDirection();
                 }

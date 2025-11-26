@@ -96,7 +96,7 @@ public class AllyManager : MonoBehaviour
         {
             if(((AllyAgent)GameData.Instance.allies[i]).agentRole == AllyAgentRole.LeadScout)
             {
-                ((AllyAgent)GameData.Instance.allies[i]).GetComponent<ScoutWander>().enabled = false;
+                ((AllyAgent)GameData.Instance.allies[i]).GetComponent<ScoutLeader>().enabled = false;
             }
             else if(((AllyAgent)GameData.Instance.allies[i]).agentRole == AllyAgentRole.FollowerScout)
             {

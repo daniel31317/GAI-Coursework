@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ScoutWander : SteeringBehaviour
+public class ScoutLeader : SteeringBehaviour
 {
     private List<Node> currentPath = new List<Node>();
     private int currentPathIndex = 0;
@@ -11,6 +11,7 @@ public class ScoutWander : SteeringBehaviour
     private List<Vector3> previousTargetPositions = new List<Vector3>();
 
     private bool returningToBase = false;
+    private bool scoutCatchingUp = false;
 
     private Node currentClosestNode;
     private AllyAgent followerScout;
@@ -21,6 +22,19 @@ public class ScoutWander : SteeringBehaviour
 
         //get desired velocity to the point
         desiredVelocity = Vector3.Normalize(currentTargetPos - transform.position) * SteeringAgent.MaxCurrentSpeed;
+
+        scoutCatchingUp = Vector3.SqrMagnitude(transform.position - followerScout.transform.position) >= (AllyManager.viewDistance / 2) * (AllyManager.viewDistance / 2);
+
+
+        if (scoutCatchingUp)
+        {
+            desiredVelocity /= 10000f;
+            ScoutFollow scoutFollowScript = followerScout.gameObject.GetComponent<ScoutFollow>();
+            if (scoutFollowScript != null && !scoutFollowScript.catchingUp)
+            {
+                followerScout.gameObject.GetComponent<ScoutFollow>().CatchUpToScout(this);
+            }
+        }
 
         //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
@@ -62,7 +76,7 @@ public class ScoutWander : SteeringBehaviour
             {
                 //get new node
                 currentPathIndex++;
-                currentTargetPos = GenerateNewTargetPosWithOffset(currentPath[currentPathIndex]);
+                currentTargetPos = Algorithms.GenerateNewTargetPosWithOffset(currentPath[currentPathIndex]);
                 previousTargetPositions.Add(currentTargetPos);
                 if (currentPathIndex >= 2)
                 {
@@ -104,7 +118,7 @@ public class ScoutWander : SteeringBehaviour
             currentPath.Remove(GridData.Instance.GetNodeAt(transform.position));
 
             //set current target 
-            currentTargetPos = GenerateNewTargetPosWithOffset(currentPath[0]);
+            currentTargetPos = Algorithms.GenerateNewTargetPosWithOffset(currentPath[0]);
             previousTargetPositions.Clear();
             previousTargetPositions.Add(currentTargetPos);
             currentPathIndex = 0;
@@ -124,17 +138,6 @@ public class ScoutWander : SteeringBehaviour
     }
 
 
-
-
-
-
-    private Vector3 GenerateNewTargetPosWithOffset(Node node)
-    {
-        Vector3 newTargetPos = new Vector3(node.position.x, node.position.y, 0f);
-        newTargetPos.x += UnityEngine.Random.Range(0f, 1f);
-        newTargetPos.y += UnityEngine.Random.Range(0f, 1f);
-        return newTargetPos;
-    }
 
 
     public void SetFollowerScout(AllyAgent lead)

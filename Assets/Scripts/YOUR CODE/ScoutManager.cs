@@ -21,7 +21,7 @@ public class ScoutManager : ScriptableObject
     {
         leadScout = newAgent;
         leadScout.SetAgentRole(AllyAgentRole.LeadScout);
-        leadScout.AddComponent<ScoutWander>();
+        leadScout.AddComponent<ScoutLeader>();
         ScoutPositionToCheck(leadScout.transform.position);
     }
 
@@ -30,7 +30,7 @@ public class ScoutManager : ScriptableObject
         followScout = newAgent;
         followScout.SetAgentRole(AllyAgentRole.FollowerScout);
         followScout.AddComponent<ScoutFollow>();
-        leadScout.GetComponent<ScoutWander>().SetFollowerScout(followScout);
+        leadScout.GetComponent<ScoutLeader>().SetFollowerScout(followScout);
     }
 
     private void ScoutPositionToCheck(Vector3 pos)
@@ -41,7 +41,7 @@ public class ScoutManager : ScriptableObject
 
         closedNodeList = Algorithms.ScoreAllAccessibleNodes(startNode);
 
-        tempEnemyLocation = closedNodeList[Random.Range(0, closedNodeList.Count - 1)];  /*GridData.Instance.GetNodeAt(new Vector3(76.5f, 30.5f, 0));*/
+        tempEnemyLocation = closedNodeList[Random.Range(0, closedNodeList.Count - 1)];  /*GridData.Instance.GetNodeAt(new Vector3(50.5f, 41.5f, 0));*/
 
         RemoveNodesWithoutCertainAmountOfNeighbours(closedNodeList);
 

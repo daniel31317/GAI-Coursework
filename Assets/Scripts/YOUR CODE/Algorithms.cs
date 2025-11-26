@@ -121,7 +121,7 @@ public static class Algorithms
             for (int i = 0; i < openNodeList[0].neighbours.Count; i++)
             {
                 Node childNode = openNodeList[0].neighbours[i];
-                if (!childNode.onClosedList && childNode.SqrMagnitude(avoidNode) >= avoidDistance * avoidDistance)
+                if (!childNode.onClosedList)
                 {
                     int g = openNodeList[0].g + CalculateInitialCost(openNodeList[0].position, childNode.position);
                     int h = ManhattanDistanceHeuristic(childNode.position, endNode.position);
@@ -134,6 +134,12 @@ public static class Algorithms
                     else if (childNode.terrain == Map.Terrain.Water)
                     {
                         f *= 4;
+                    }
+
+                    //avoid going in range of enemy but still pathfind if needed
+                    if (childNode.SqrMagnitude(avoidNode) < avoidDistance * avoidDistance)
+                    {
+                        f *= 1000;
                     }
 
                     if (f <= childNode.f || !childNode.onOpenList)
@@ -332,7 +338,6 @@ public static class Algorithms
 
     #endregion
 
-
     #region scoring nodes
 
     public static List<Node> ScoreAllAccessibleNodes(Node startNode)
@@ -484,7 +489,7 @@ public static class Algorithms
             nodesToReset.Add(nodesToSearch[0]);
 
             Profiler.BeginSample("Remove Nodes");
-            if (nodesToSearch.Count > 1)
+            if (nodesToSearch.Count > 0)
             {
                 Node referenceNode = nodesToSearch[0];
                 nodesToSearch.RemoveAll(n => IsNodeInRange(referenceNode, n, removeNodesInDistance));
@@ -536,5 +541,15 @@ public static class Algorithms
         return false;
     }
 
+    #endregion
+
+    #region other
+    public static Vector3 GenerateNewTargetPosWithOffset(Node node)
+    {
+        Vector3 newTargetPos = new Vector3(node.position.x, node.position.y, 0f);
+        newTargetPos.x += Random.Range(0f, 1f);
+        newTargetPos.y += Random.Range(0f, 1f);
+        return newTargetPos;
+    }
     #endregion
 }
