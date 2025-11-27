@@ -7,16 +7,13 @@ public class AllyManager : MonoBehaviour
 {
     public static AllyManager Instance { get; private set; }
     public GameObject scoutBlock;
-    public GameObject enemyBlock;
     public GameObject moveBlock;
     public static ScoutManager ScoutManager { get; private set; }
 
-    public bool attackEnemies { get; private set; } = false;
     public Node enemyPosition { get; private set; }
 
-    private int alliesReadyToAttack = 0;
-    public const int viewDistance = 10;
-    public const int viewDistanceSqr = 100;
+    public const int viewDistance = 15;
+    public const int viewDistanceSqr = 225;
 
     public Vector3 currentBasePosition { get; private set; }
 
@@ -33,27 +30,6 @@ public class AllyManager : MonoBehaviour
     {
         ScoutManager = (ScoutManager)ScriptableObject.CreateInstance("ScoutManager");
         ScoutManager.scoutBlock = scoutBlock;   
-        ScoutManager.enemyBlock = enemyBlock;   
-    }
-
-    private void Update()
-    {
-        if(!attackEnemies)
-        {
-            return;
-        }
-
-        if(alliesReadyToAttack == GameData.Instance.allies.Count)
-        {
-            alliesReadyToAttack++;
-            for (int i = 0; i < GameData.Instance.allies.Count; i++)
-            {
-                ((AllyAgent)GameData.Instance.allies[i]).GetComponent<AllyAgent>().StartAttacking();
-            }
-        }
-
-
-
     }
 
 
@@ -80,9 +56,7 @@ public class AllyManager : MonoBehaviour
     
     public void FoundEnemyToAttack(List<Node> currentPathToEnemyReverse, Vector2 position)
     {
-        alliesReadyToAttack = 0;
         enemyPosition = GridData.Instance.GetNodeAt(position);
-        attackEnemies = true;
 
 
         Profiler.BeginSample("GetPositionsDistanceAwayFromNode");
@@ -224,7 +198,7 @@ public class AllyManager : MonoBehaviour
         int index = 0;
         for (int j = 0; j < path.Count; j++)
         {
-            if (enemyPosition.SqrMagnitude(path[j]) < viewDistance * viewDistance)
+            if (enemyPosition.SqrMagnitude(path[j]) < viewDistanceSqr)
             {
                 continue;
             }
@@ -237,16 +211,4 @@ public class AllyManager : MonoBehaviour
         }
         return index;
     }
-
-
-    public void AllyInPositionToAttack()
-    {
-        alliesReadyToAttack++;
-    }
-
-
-
-
-
-
 }

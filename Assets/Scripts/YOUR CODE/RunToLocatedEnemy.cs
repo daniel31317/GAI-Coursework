@@ -12,8 +12,7 @@ public class RunToLocatedEnemy : SteeringBehaviour
     private Vector3 currentTargetPos = new Vector3();
     private List<Node> currentPath = new List<Node>();
 
-    bool atShootPosition = false;
-    bool readyToShoot = false;
+    public bool atShootPosition = false;
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
@@ -35,12 +34,7 @@ public class RunToLocatedEnemy : SteeringBehaviour
         //divide by big number so they allys dont move but look the right way
         if(atShootPosition)
         {
-            desiredVelocity /= 10000f;
-            if (!readyToShoot)
-            {
-                AllyManager.Instance.AllyInPositionToAttack();
-                readyToShoot = true;
-            }
+            desiredVelocity /= 10f;
         }
 
         //calculate steering velocity
@@ -53,7 +47,19 @@ public class RunToLocatedEnemy : SteeringBehaviour
 
     private void HandleAIPathfinding()
     {
-        if(currentPath == null)
+        if(Vector3.SqrMagnitude(transform.position - currentTargetPos) < Attack.AllyGunData.range * Attack.AllyGunData.range)
+        {
+            atShootPosition = true;
+            currentTargetPos = Algorithms.GetClosestEnemyInLos(transform.position);
+        }
+        else
+        {
+            atShootPosition = true;
+            currentTargetPos = AllyManager.Instance.currentBasePosition;
+        }
+
+
+        if (currentPath == null)
         {
             return;
         }
@@ -82,7 +88,6 @@ public class RunToLocatedEnemy : SteeringBehaviour
 
             if (distanceToCurrentNode < 0.001f)
             {
-                currentTargetPos = AllyManager.Instance.enemyPosition.position;
                 atShootPosition = true;
             }          
         }

@@ -558,5 +558,31 @@ public static class Algorithms
         newTargetPos.y += Random.Range(0f, 1f);
         return newTargetPos;
     }
+
+    public static Vector3 GetClosestEnemyInLos(Vector3 position)
+    {
+        Vector3 closestPos = Vector3.zero;
+        float closestDistance = 10000000;
+
+        for (int i = 0; i < GameData.Instance.enemies.Count; i++)
+        {
+            if (!GameData.Instance.enemies[i].gameObject.activeSelf)
+            {
+                continue;
+            }
+            float newDistance = Vector3.SqrMagnitude(position - GameData.Instance.enemies[i].transform.position);
+
+            if (IsPositionInLineOfSight(position, GameData.Instance.enemies[i].transform.position) && newDistance < closestDistance)
+            {
+                closestPos = GameData.Instance.enemies[i].transform.position;
+                closestDistance = newDistance;
+            }
+        }
+
+        return closestPos;
+    }
+
+
+
     #endregion
 }

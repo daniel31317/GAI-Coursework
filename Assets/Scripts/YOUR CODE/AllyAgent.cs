@@ -6,8 +6,6 @@ public class AllyAgent : SteeringAgent
 
 	public AllyAgentRole agentRole { get; private set; } = AllyAgentRole.Soldier;
 
-	private bool shouldAllyAttack = false;
-
 	protected override void InitialiseFromAwake()
 	{
 		
@@ -18,7 +16,7 @@ public class AllyAgent : SteeringAgent
 	{
 		base.CooperativeArbitration();
 
-		if(shouldAllyAttack)
+		if(GetComponent<RunToLocatedEnemy>().atShootPosition)
 		{
 			AttackWith(attackType);
 		}
@@ -54,13 +52,5 @@ public class AllyAgent : SteeringAgent
 	{
 		agentRole = role;
 	}
-
-
-    public void StartAttacking()
-    {
-		shouldAllyAttack = true;
-    }
-
-
 
 }

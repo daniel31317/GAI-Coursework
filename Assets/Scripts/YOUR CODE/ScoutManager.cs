@@ -10,9 +10,6 @@ public class ScoutManager : ScriptableObject
     public List<Node> nodesToScout { get; private set; }
 
     public GameObject scoutBlock;
-    public GameObject enemyBlock;
-
-    public Node tempEnemyLocation;
     
 
 
@@ -41,8 +38,6 @@ public class ScoutManager : ScriptableObject
 
         closedNodeList = Algorithms.ScoreAllAccessibleNodes(startNode);
 
-        tempEnemyLocation = closedNodeList[Random.Range(0, closedNodeList.Count - 1)];  /*GridData.Instance.GetNodeAt(new Vector3(50.5f, 41.5f, 0));*/
-
         RemoveNodesWithoutCertainAmountOfNeighbours(closedNodeList);
 
         SortNodeListByDescendingF(closedNodeList);
@@ -57,12 +52,6 @@ public class ScoutManager : ScriptableObject
             GameObject temp = Instantiate(scoutBlock, nodesToScout[i].position + offset, Quaternion.identity);
             temp.transform.parent = AllyManager.Instance.transform;
         }
-
-       
-
-        GameObject temp1 = Instantiate(enemyBlock, tempEnemyLocation.position + offset, Quaternion.identity);
-        temp1.transform.parent = AllyManager.Instance.transform;
-
     }
 
     

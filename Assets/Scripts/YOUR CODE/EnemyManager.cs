@@ -35,9 +35,6 @@ public class EnemyManager : MonoBehaviour
         while (enemiesToGroup.Count > 0)
         {
             EnemyGroup currentGroup = new EnemyGroup();
-
-
-
             currentGroup.AddEnemyToGroup(enemiesToGroup[0]);
             enemiesToGroup.RemoveAt(0);
 
@@ -60,12 +57,30 @@ public class EnemyManager : MonoBehaviour
             }
 
             currentGroup.BasePosition /= currentGroup.Enemies.Count;
+            currentGroup.BaseNode =GridData.Instance.GetNodeAt(currentGroup.BasePosition);
 
             Groups.Add(currentGroup);
         }
     }
 
 
+    public EnemyGroup GetClosestGroup(Vector3 position)
+    {
+        EnemyGroup closestGroup = Groups[0];
+        float closestDistance = Vector2.SqrMagnitude((Vector2)position - Groups[0].BaseNode.position);
+        for (int i = 1; i < Groups.Count; i++)
+        {
+            float newDistance = Vector2.SqrMagnitude((Vector2)position - Groups[i].BaseNode.position);
+            if (newDistance < closestDistance)
+            {
+                closestDistance = newDistance;
+                closestGroup = Groups[i];
+            }
+        }
+
+
+        return closestGroup;
+    }
 
 
 

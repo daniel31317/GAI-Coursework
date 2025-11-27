@@ -16,6 +16,8 @@ public class ScoutLeader : SteeringBehaviour
     private Node currentClosestNode;
     private AllyAgent followerScout;
 
+    private Vector3 closestEnemyPosition;
+
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
         HandleIfAllyNeedsNewNodeToPathfind();
@@ -44,17 +46,19 @@ public class ScoutLeader : SteeringBehaviour
 
     private void HandleIfAllyNeedsNewNodeToPathfind()
     {
-
-        if(Vector3.SqrMagnitude((Vector3)AllyManager.ScoutManager.tempEnemyLocation.position - transform.position) <= AllyManager.viewDistanceSqr && !returningToBase)
+        if (!returningToBase)
         {
-            returningToBase = Algorithms.IsPositionInLineOfSight(transform.position, AllyManager.ScoutManager.tempEnemyLocation.position);
-            if (returningToBase)
+            closestEnemyPosition = Algorithms.GetClosestEnemyInLos(transform.position);
+
+            if (closestEnemyPosition != Vector3.zero)
             {
+                returningToBase = true;
                 currentClosestNode = GridData.Instance.GetNodeAt(AllyManager.Instance.currentBasePosition);
                 PathfindToNewNode();
                 return;
             }
         }
+
         //if there is not already a current path and there are nodes to scout
         if (currentPath.Count == 0 && AllyManager.ScoutManager.nodesToScout.Count > 0)
         {
@@ -93,7 +97,7 @@ public class ScoutLeader : SteeringBehaviour
         }
         else if (returningToBase)
         {
-            AllyManager.Instance.FoundEnemyToAttack(currentPath, AllyManager.ScoutManager.tempEnemyLocation.position);
+            AllyManager.Instance.FoundEnemyToAttack(currentPath, closestEnemyPosition);
         }
     }
 
@@ -107,7 +111,7 @@ public class ScoutLeader : SteeringBehaviour
         }
         else
         {
-            currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), currentClosestNode, AllyManager.ScoutManager.tempEnemyLocation, AllyManager.viewDistance, false);
+            currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), currentClosestNode, GridData.Instance.GetNodeAt(closestEnemyPosition), AllyManager.viewDistance, false);
         }
 
 
