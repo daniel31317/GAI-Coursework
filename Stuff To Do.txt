@@ -1,7 +1,5 @@
 Handle ally being stuck
 
-Add actual enemies
-
 Target multiple enemies then shoot
 
 Moving to another group of enemies

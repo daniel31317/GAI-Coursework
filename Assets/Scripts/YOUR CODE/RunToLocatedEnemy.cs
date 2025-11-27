@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static Attack;
-using static UnityEngine.GraphicsBuffer;
+
 
 public class RunToLocatedEnemy : SteeringBehaviour
 {
@@ -47,15 +45,13 @@ public class RunToLocatedEnemy : SteeringBehaviour
 
     private void HandleAIPathfinding()
     {
-        if(Vector3.SqrMagnitude(transform.position - currentTargetPos) < Attack.AllyGunData.range * Attack.AllyGunData.range)
+
+        Vector3 currentEnemyPosition = Algorithms.GetClosestEnemyInLos(transform.position);
+        if (Vector3.SqrMagnitude(transform.position - currentEnemyPosition) < Attack.AllyGunData.range * Attack.AllyGunData.range)
         {
             atShootPosition = true;
-            currentTargetPos = Algorithms.GetClosestEnemyInLos(transform.position);
-        }
-        else
-        {
-            atShootPosition = true;
-            currentTargetPos = AllyManager.Instance.currentBasePosition;
+            currentTargetPos = currentEnemyPosition;
+            return;
         }
 
 

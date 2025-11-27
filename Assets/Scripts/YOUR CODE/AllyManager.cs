@@ -58,6 +58,24 @@ public class AllyManager : MonoBehaviour
     {
         enemyPosition = GridData.Instance.GetNodeAt(position);
 
+        if (Algorithms.IsPositionInLineOfSight(currentBasePosition, enemyPosition.position))
+        {
+            for (int i = 0; i < GameData.Instance.allies.Count; i++)
+            {
+                if (((AllyAgent)GameData.Instance.allies[i]).agentRole == AllyAgentRole.LeadScout)
+                {
+                    ((AllyAgent)GameData.Instance.allies[i]).GetComponent<ScoutLeader>().enabled = false;
+                }
+                else if (((AllyAgent)GameData.Instance.allies[i]).agentRole == AllyAgentRole.FollowerScout)
+                {
+                    ((AllyAgent)GameData.Instance.allies[i]).GetComponent<ScoutFollow>().enabled = false;
+                }
+                ((AllyAgent)GameData.Instance.allies[i]).SetAgentRole(AllyAgentRole.Soldier);
+                ((AllyAgent)GameData.Instance.allies[i]).GetComponent<RunToLocatedEnemy>().enabled = true;
+                ((AllyAgent)GameData.Instance.allies[i]).GetComponent<RunToLocatedEnemy>().atShootPosition = true;
+            }
+        }
+
 
         Profiler.BeginSample("GetPositionsDistanceAwayFromNode");
         NodesOfInterest movePositions = GetPositionsDistanceAwayFromNode(enemyPosition);

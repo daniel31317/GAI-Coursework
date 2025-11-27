@@ -303,9 +303,11 @@ public static class Algorithms
         for (; n > 0; --n)
         {
             //add a node that we have looped over
-            rayTracedNodes.Add(GridData.Instance.GetNodeAt(new Vector3(x, y, 0)));
-
-
+            if(x > -1 && y > -1)
+            {
+                rayTracedNodes.Add(GridData.Instance.GetNodeAt(new Vector3(x, y, 0)));
+            }
+            
             //if error is positive we move in the y direction else move in x direction
             //both based on incriments determined earlier
             if (error > 0)
