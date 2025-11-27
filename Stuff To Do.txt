@@ -13,3 +13,7 @@ Add idle to allies waiting
 Remove profiler
 
 Comment
+
+Add state machines maybe
+
+Clean up code
