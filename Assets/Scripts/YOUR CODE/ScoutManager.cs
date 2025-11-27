@@ -11,23 +11,23 @@ public class ScoutManager : ScriptableObject
 
     public GameObject scoutBlock;
     
-
+    public void InitialiseScoutPositions()
+    {
+        ScoutPositionToCheck(leadScout.transform.position);
+    }
 
 
     public void SetAgentAsScoutLead(AllyAgent newAgent)
     {
         leadScout = newAgent;
-        leadScout.SetAgentRole(AllyAgentRole.LeadScout);
-        leadScout.AddComponent<ScoutLeader>();
-        ScoutPositionToCheck(leadScout.transform.position);
+        leadScout.SwitchAgentRole(AllyAgentRole.LeadScout);    
     }
 
     public void SetAgentAsScoutFollower(AllyAgent newAgent)
     {
         followScout = newAgent;
-        followScout.SetAgentRole(AllyAgentRole.FollowerScout);
-        followScout.AddComponent<ScoutFollow>();
-        leadScout.GetComponent<ScoutLeader>().SetFollowerScout(followScout);
+        followScout.SwitchAgentRole(AllyAgentRole.FollowerScout);
+        leadScout.scoutLeader.SetFollowerScout(followScout);
     }
 
     private void ScoutPositionToCheck(Vector3 pos)

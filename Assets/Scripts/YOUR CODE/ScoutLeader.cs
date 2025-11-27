@@ -16,7 +16,7 @@ public class ScoutLeader : SteeringBehaviour
     private Node currentClosestNode;
     private AllyAgent followerScout;
 
-    private Vector3 closestEnemyPosition;
+    private EnemyAgent closestEnemy;
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
@@ -48,9 +48,9 @@ public class ScoutLeader : SteeringBehaviour
     {
         if (!returningToBase)
         {
-            closestEnemyPosition = Algorithms.GetClosestEnemyInLos(transform.position);
+            closestEnemy = Algorithms.GetClosestEnemyInLos(transform.position);
 
-            if (closestEnemyPosition != Vector3.zero)
+            if (closestEnemy != null)
             {
                 returningToBase = true;
                 currentClosestNode = GridData.Instance.GetNodeAt(AllyManager.Instance.currentBasePosition);
@@ -97,24 +97,15 @@ public class ScoutLeader : SteeringBehaviour
         }
         else if (returningToBase)
         {
-            AllyManager.Instance.FoundEnemyToAttack(currentPath, closestEnemyPosition);
+            AllyManager.Instance.FoundEnemyToAttack(closestEnemy);
         }
     }
 
 
     private void PathfindToNewNode()
     {
-        //pathfind to node
-        if(!returningToBase)
-        {
-            currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), currentClosestNode);
-        }
-        else
-        {
-            currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), currentClosestNode, GridData.Instance.GetNodeAt(closestEnemyPosition), AllyManager.viewDistance, false);
-        }
 
-
+        currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), currentClosestNode);
         //if we have a path
         if (currentPath != null && currentPath.Count > 1)
         {

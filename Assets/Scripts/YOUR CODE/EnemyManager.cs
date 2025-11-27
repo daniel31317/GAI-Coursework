@@ -34,7 +34,7 @@ public class EnemyManager : MonoBehaviour
 
         while (enemiesToGroup.Count > 0)
         {
-            EnemyGroup currentGroup = new EnemyGroup();
+            EnemyGroup currentGroup = new EnemyGroup(true);
             currentGroup.AddEnemyToGroup(enemiesToGroup[0]);
             enemiesToGroup.RemoveAt(0);
 
@@ -45,7 +45,6 @@ public class EnemyManager : MonoBehaviour
                     if (Vector3.SqrMagnitude(enemiesToGroup[i].transform.position - currentGroup.Enemies[j].transform.position) <= DistanceToBeConideredInGroup * DistanceToBeConideredInGroup)
                     {
                         currentGroup.AddEnemyToGroup(enemiesToGroup[i]);
-                        currentGroup.BasePosition += enemiesToGroup[i].transform.position;
                         enemiesToGroup.Remove(enemiesToGroup[i]);
                     }
                     else
@@ -56,30 +55,26 @@ public class EnemyManager : MonoBehaviour
                 
             }
 
-            currentGroup.BasePosition /= currentGroup.Enemies.Count;
-            currentGroup.BaseNode =GridData.Instance.GetNodeAt(currentGroup.BasePosition);
-
             Groups.Add(currentGroup);
         }
     }
 
 
-    public EnemyGroup GetClosestGroup(Vector3 position)
+
+    public EnemyGroup GetGroupIncludingThisEnemy(EnemyAgent enemy)
     {
-        EnemyGroup closestGroup = Groups[0];
-        float closestDistance = Vector2.SqrMagnitude((Vector2)position - Groups[0].BaseNode.position);
-        for (int i = 1; i < Groups.Count; i++)
+        for (int i = 0; i < Groups.Count; i++)
         {
-            float newDistance = Vector2.SqrMagnitude((Vector2)position - Groups[i].BaseNode.position);
-            if (newDistance < closestDistance)
+            for (int j = 0; j < Groups[i].Enemies.Count; j++)
             {
-                closestDistance = newDistance;
-                closestGroup = Groups[i];
+                if(Groups[i].Enemies[j] == enemy)
+                {
+                    return Groups[i];
+                }
             }
         }
 
-
-        return closestGroup;
+        return new EnemyGroup(false);
     }
 
 
@@ -92,13 +87,20 @@ public class EnemyManager : MonoBehaviour
 public struct EnemyGroup
 {
     public List<SteeringAgent> Enemies;// { get; private set; }
-    public Vector3 BasePosition;// { get; private set; }
-    public Node BaseNode;// { get; private set; }
+    public bool isRealGroup;
+
+    public EnemyGroup(bool isReal)
+    {
+        Enemies = new List<SteeringAgent>();    
+        isRealGroup = isReal;
+
+    }
 
     public void AddEnemyToGroup(SteeringAgent enemyAgent)
     {
         if(Enemies == null)
         {
+            isRealGroup = true;
             Enemies = new List<SteeringAgent>();
         }
         Enemies.Add(enemyAgent);
@@ -106,11 +108,6 @@ public struct EnemyGroup
     public void RemoveEnemyFromGroup(SteeringAgent enemyAgent)
     {
         Enemies.Remove(enemyAgent);
-    }
-
-    public void SetBasePosition(Vector2 pos)
-    {
-        BasePosition = pos;
     }
 
 }

@@ -46,13 +46,18 @@ public class RunToLocatedEnemy : SteeringBehaviour
     private void HandleAIPathfinding()
     {
 
-        Vector3 currentEnemyPosition = Algorithms.GetClosestEnemyInLos(transform.position);
-        if (Vector3.SqrMagnitude(transform.position - currentEnemyPosition) < Attack.AllyGunData.range * Attack.AllyGunData.range)
+        EnemyAgent currentEnemyPosition = Algorithms.GetClosestEnemyInLos(transform.position);
+        if (currentEnemyPosition != null)
         {
-            atShootPosition = true;
-            currentTargetPos = currentEnemyPosition;
-            return;
+            if (Vector3.SqrMagnitude(transform.position - currentEnemyPosition.transform.position) < Attack.AllyGunData.range * Attack.AllyGunData.range)
+            {
+                atShootPosition = true;
+                currentTargetPos = currentEnemyPosition.transform.position;
+                return;
+            }
         }
+
+        
 
 
         if (currentPath == null)

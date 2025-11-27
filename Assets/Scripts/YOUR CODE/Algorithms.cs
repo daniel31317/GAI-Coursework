@@ -561,9 +561,9 @@ public static class Algorithms
         return newTargetPos;
     }
 
-    public static Vector3 GetClosestEnemyInLos(Vector3 position)
+    public static EnemyAgent GetClosestEnemyInLos(Vector3 position)
     {
-        Vector3 closestPos = Vector3.zero;
+        EnemyAgent closestEnemy = null;
         float closestDistance = 10000000;
 
         for (int i = 0; i < GameData.Instance.enemies.Count; i++)
@@ -576,12 +576,12 @@ public static class Algorithms
 
             if (IsPositionInLineOfSight(position, GameData.Instance.enemies[i].transform.position) && newDistance < closestDistance)
             {
-                closestPos = GameData.Instance.enemies[i].transform.position;
+                closestEnemy = (EnemyAgent)GameData.Instance.enemies[i];
                 closestDistance = newDistance;
             }
         }
 
-        return closestPos;
+        return closestEnemy;
     }
 
 
