@@ -20,7 +20,8 @@ public class ScoutManager : ScriptableObject
     public void SetAgentAsScoutLead(AllyAgent newAgent)
     {
         leadScout = newAgent;
-        leadScout.SwitchAgentRole(AllyAgentRole.LeadScout);    
+        leadScout.SwitchAgentRole(AllyAgentRole.LeadScout);
+        leadScout.scoutLeader.ResetScout();
     }
 
     public void SetAgentAsScoutFollower(AllyAgent newAgent)

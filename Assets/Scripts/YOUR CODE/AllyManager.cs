@@ -62,7 +62,6 @@ public class AllyManager : MonoBehaviour
                 m_agents[i].SwitchAgentRole(AllyAgentRole.OnBreak);
             }
 
-
             positionTotal += m_agents[i].transform.position;
         }
 
@@ -109,6 +108,7 @@ public class AllyManager : MonoBehaviour
 
         if (Algorithms.IsPositionInLineOfSight(enemyPosition, currentBasePosition) && Vector3.SqrMagnitude(enemyPosition - currentBasePosition) < viewDistanceSqr)
         {
+            
             for (int i = 0; i < m_agents.Count; i++)
             {
                 m_agents[i].SwitchAgentRole(AllyAgentRole.Soldier);
@@ -118,8 +118,14 @@ public class AllyManager : MonoBehaviour
         }
 
 
+        List<Node> currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(currentBasePosition), enemyNode);
 
 
+        for (int i = 0; i < m_agents.Count; i++)
+        {
+            m_agents[i].SwitchAgentRole(AllyAgentRole.Soldier);
+            m_agents[i].runToLocatedEnemy.SetCurrentPath(currentPath);
+        }
 
 
 

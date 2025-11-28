@@ -42,6 +42,7 @@ public class AllyAgent : SteeringAgent
         scoutLeader.enabled = false;
         scoutFollow.enabled = false;
         idle.enabled = false;
+		runToLocatedEnemy.atShootPosition = false;
 
         switch (agentRole)
 		{
@@ -75,7 +76,6 @@ public class AllyAgent : SteeringAgent
 		scoutLeader = GetComponent<ScoutLeader>();
 		scoutFollow = GetComponent<ScoutFollow>();
 		idle = GetComponent<Idle>();
-
     }
 
 }

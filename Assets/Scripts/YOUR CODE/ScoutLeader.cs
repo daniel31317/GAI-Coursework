@@ -133,6 +133,23 @@ public class ScoutLeader : SteeringBehaviour
     }
 
 
+    public void ResetScout()
+    {
+        currentPath = new List<Node>();
+        currentPathIndex = 0;
+
+        currentTargetPos = new Vector3();
+        previousTargetPositions = new List<Vector3>();
+
+        returningToBase = false;
+        scoutCatchingUp = false;
+
+        currentClosestNode = null;
+        followerScout = null;
+
+        closestEnemy = null;
+    }
+
 
 
     public void SetFollowerScout(AllyAgent lead)
