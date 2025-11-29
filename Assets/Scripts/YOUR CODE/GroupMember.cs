@@ -37,6 +37,8 @@ public class GroupMember : SteeringBehaviour
         else
         {
             desiredVelocity += (Vector3)CalcualteSeperationForce();
+            Vector2 avoid = Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
+            desiredVelocity += (Vector3)avoid;
         }
 
 
@@ -59,6 +61,10 @@ public class GroupMember : SteeringBehaviour
                 atShootPosition = true;
                 return;
             }
+            else
+            {
+                atShootPosition = false;
+            }
         }
 
         Transform leaderTransform = AllyManager.Instance.groupLeader.transform;
@@ -66,6 +72,9 @@ public class GroupMember : SteeringBehaviour
         currentTargetPos = leaderTransform.position - (-leaderTransform.forward * 2);
 
     }
+
+
+    
 
 
 
@@ -103,50 +112,6 @@ public class GroupMember : SteeringBehaviour
     }
 
 
-
-    /*
-    Vector2 totalForce = Vector2.Zero;
-    int neighboursCount = 0;
-
-    // For each agent in the environment
-    foreach (var a in agents)
-    {
-        // That is not us
-        if (a != agent)
-        {
-            // Calculate the distance between the two agents
-            float distance = agent.Position.DistanceTo(a.Position);
-
-            // That is within the distance we want to separate from
-            // distance > 0 is implicitly handled unless agents can occupy the exact same spot, 
-            // but it's kept for logical consistency.
-            if (distance < agent.MinSeparation && distance > 0)
-            {
-                // Calculate a Vector from the other agent to us (the push direction)
-                Vector2 pushForce = agent.Position.Minus(a.Position);
-
-                // Scale it based on how close they are compared to our radius
-                // NOTE: The original JS used 'agent.radius', which is unusual for scaling 
-                // a separation force; often, it's inversely proportional to distance^2 
-                // or just distance, but I've kept the original logic's structure:
-                // pushForce / agent.radius
-                totalForce = totalForce.Plus(pushForce.Div(agent.Radius));
-                neighboursCount++;
-            }
-        }
-    }
-
-    if (neighboursCount == 0)
-    {
-        return Vector2.Zero;
-    }
-
-    // Normalise the total accumulated force (divide by count)
-    totalForce = totalForce.Div(neighboursCount);
-    
-    // Then scale it by the maximum allowable force for this agent.
-    return totalForce.Mul(agent.MaxForce);
-    */
 
 
 }

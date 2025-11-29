@@ -23,7 +23,7 @@ public class AllyAgent : SteeringAgent
 	{
 		base.CooperativeArbitration();
 
-		if((agentRole == AllyAgentRole.GroupLeader && groupLeader.atShootPosition)
+        if ((agentRole == AllyAgentRole.GroupLeader && groupLeader.atShootPosition)
 			|| (agentRole == AllyAgentRole.GroupMember && groupMember.atShootPosition))
 		{
 			AttackWith(attackType);

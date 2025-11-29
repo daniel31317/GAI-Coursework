@@ -8,8 +8,6 @@ public class ScoutManager : ScriptableObject
     private AllyAgent leadScout;
     private AllyAgent followScout;
     public List<Node> nodesToScout { get; private set; }
-
-    public GameObject scoutBlock;
     
     public void InitialiseScoutPositions()
     {
@@ -45,14 +43,6 @@ public class ScoutManager : ScriptableObject
 
         //get points of interest and remove anthing within +/- 5 on x and y
         nodesToScout = Algorithms.GetNodesOfInterest(closedNodeList, 15);
-
-        //show blocks can be removed later
-        Vector2 offset = new Vector2(0.5f, 0.5f);
-        for (int i = 0; i < nodesToScout.Count; i++)
-        {
-            GameObject temp = Instantiate(scoutBlock, nodesToScout[i].position + offset, Quaternion.identity);
-            temp.transform.parent = AllyManager.Instance.transform;
-        }
     }
 
     
@@ -136,8 +126,6 @@ public class ScoutManager : ScriptableObject
 
     public void RemoveScoutedNode(Node node)
     {
-        int index = nodesToScout.FindIndex(n => n == node);
-        Destroy(AllyManager.Instance.transform.GetChild(index).gameObject);
         nodesToScout.Remove(node);
     }
 }

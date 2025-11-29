@@ -34,6 +34,11 @@ public class GroupLeader : SteeringBehaviour
         {
             desiredVelocity /= 10f;
         }
+        else
+        {
+            Vector2 avoid = Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
+            desiredVelocity += (Vector3)avoid;
+        }
 
         //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
@@ -54,6 +59,10 @@ public class GroupLeader : SteeringBehaviour
                 atShootPosition = true;
                 currentTargetPos = currentEnemyPosition.transform.position;
                 return;
+            }
+            else
+            {
+                atShootPosition = false;
             }
         }
 

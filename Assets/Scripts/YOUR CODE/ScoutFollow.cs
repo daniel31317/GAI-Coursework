@@ -25,6 +25,9 @@ public class ScoutFollow : SteeringBehaviour
 
         desiredVelocity = Vector3.Normalize(currentTargetPos - transform.position) * SteeringAgent.MaxCurrentSpeed;
 
+        Vector2 avoid = Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
+        desiredVelocity += (Vector3)avoid;
+
         //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
 

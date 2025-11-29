@@ -10,8 +10,6 @@ public class AllyManager : MonoBehaviour
 
     public List<AllyAgent> m_agents { get; private set; } = new List<AllyAgent>();
 
-    public GameObject scoutBlock;
-    public GameObject moveBlock;
     public static ScoutManager ScoutManager { get; private set; }
 
     public const int viewDistance = 31;
@@ -39,9 +37,6 @@ public class AllyManager : MonoBehaviour
             m_agents.Add((AllyAgent)GameData.Instance.allies[i]);
             m_agents[i].AddAllComponents();
         }
-
-        
-        ScoutManager.scoutBlock = scoutBlock;
     }
 
 
@@ -79,6 +74,11 @@ public class AllyManager : MonoBehaviour
             {
                 m_agents.Remove(m_agents[i]);
             }
+        }
+
+        if (groupLeader != null && !groupLeader.gameObject.activeSelf)
+        {
+            AssignNewGroupLeader();
         }
 
 
@@ -134,6 +134,7 @@ public class AllyManager : MonoBehaviour
 
                 
         }
+    }
 
 
 
@@ -141,8 +142,12 @@ public class AllyManager : MonoBehaviour
 
 
 
-
-
+    public void AssignNewGroupLeader()
+    {
+        if (m_agents.Count > 0)
+        {
+            m_agents[0].SwitchAgentRole(AllyAgentRole.GroupLeader);
+        }
     }
 }
 

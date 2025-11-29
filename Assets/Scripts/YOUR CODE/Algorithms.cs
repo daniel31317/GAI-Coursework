@@ -587,4 +587,34 @@ public static class Algorithms
 
 
     #endregion
+
+
+
+
+    #region steering behaviours
+    public static Vector2 CalcualteObstacleAvoidanceForce(Vector3 currentPosition)
+    {
+        Vector2 totalForce = Vector2.zero;
+        Node currentNode = GridData.Instance.GetNodeAt(currentPosition);
+
+        if (currentNode.neighbours.Count == 8)
+        {
+            return Vector2.zero;
+        }
+
+        for (int x = -1; x <= 1; x++)
+        {
+            for (int y = -1; y <= 1; y++)
+            {
+                if (GameData.Instance.Map.GetTerrainAt((int)currentNode.position.x + x, (int)currentNode.position.y + y) == Map.Terrain.Tree)
+                {
+                    totalForce += (Vector2)currentPosition - (currentNode.position + new Vector2(x, y));
+                }
+
+            }
+        }
+
+        return totalForce * SteeringAgent.MaxCurrentSpeed;
+    }
+    #endregion
 }
