@@ -8,7 +8,7 @@ public class AllyManager : MonoBehaviour
 {
     public static AllyManager Instance { get; private set; }
 
-    private List<AllyAgent> m_agents = new List<AllyAgent>();
+    public List<AllyAgent> m_agents { get; private set; } = new List<AllyAgent>();
 
     public GameObject scoutBlock;
     public GameObject moveBlock;
