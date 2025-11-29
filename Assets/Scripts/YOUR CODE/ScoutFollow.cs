@@ -32,6 +32,8 @@ public class ScoutFollow : SteeringBehaviour
     }
 
 
+
+
     public void SetTargetPos(Vector3 targetPos)
     { 
         currentTargetPos = targetPos;

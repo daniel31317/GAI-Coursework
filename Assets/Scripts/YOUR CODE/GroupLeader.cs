@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 
-public class RunToLocatedEnemy : SteeringBehaviour
+public class GroupLeader : SteeringBehaviour
 {
     private int currentPathIndex = 0;
     private Vector3 currentTargetPos = new Vector3();
@@ -18,7 +18,7 @@ public class RunToLocatedEnemy : SteeringBehaviour
 
         Vector3 targetOffset = currentTargetPos - transform.position;
 
-        //use of arrival - https://www.red3d.com/cwr/steer/gdc99/#:~:text=Arrival%20behavior%20is%20identical%20to,as%20shown%20in%20Figure%206.
+        //use of arrival - https://www.red3d.com/cwr/papers/1999/gdc99steer.pdf
 
         float distance = targetOffset.magnitude;
 

@@ -20,6 +20,7 @@ public class AllyManager : MonoBehaviour
     public EnemyGroup currentEnemyGroup = new EnemyGroup(false);
 
     public Vector3 currentBasePosition { get; private set; }
+    public AllyAgent groupLeader { get; private set; }
 
 
     private void Awake()
@@ -72,6 +73,15 @@ public class AllyManager : MonoBehaviour
 
     public void Update()
     {
+        for(int i = 0; i < m_agents.Count; i++)
+        {
+            if (!m_agents[i].gameObject.activeSelf)
+            {
+                m_agents.Remove(m_agents[i]);
+            }
+        }
+
+
         if(!currentEnemyGroup.isRealGroup)
         {
             return;
@@ -106,25 +116,23 @@ public class AllyManager : MonoBehaviour
 
         currentEnemyGroup = EnemyManager.Instance.GetGroupIncludingThisEnemy(enemyToAttack);
 
-        if (Algorithms.IsPositionInLineOfSight(enemyPosition, currentBasePosition) && Vector3.SqrMagnitude(enemyPosition - currentBasePosition) < viewDistanceSqr)
-        {
-            
-            for (int i = 0; i < m_agents.Count; i++)
-            {
-                m_agents[i].SwitchAgentRole(AllyAgentRole.Soldier);
-            }
-
-            return;
-        }
-
-
         List<Node> currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(currentBasePosition), enemyNode);
 
 
         for (int i = 0; i < m_agents.Count; i++)
         {
-            m_agents[i].SwitchAgentRole(AllyAgentRole.Soldier);
-            m_agents[i].runToLocatedEnemy.SetCurrentPath(currentPath);
+            if(i == 0)
+            {
+                m_agents[i].SwitchAgentRole(AllyAgentRole.GroupLeader);
+                m_agents[i].groupLeader.SetCurrentPath(currentPath);
+                groupLeader = m_agents[i];
+            }
+            else
+            {
+                m_agents[i].SwitchAgentRole(AllyAgentRole.GroupMember);
+            }
+
+                
         }
 
 

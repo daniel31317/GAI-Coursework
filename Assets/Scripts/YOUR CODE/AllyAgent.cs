@@ -4,10 +4,11 @@ public class AllyAgent : SteeringAgent
 {
 	private Attack.AttackType attackType = Attack.AttackType.AllyGun;
 
-	public AllyAgentRole agentRole { get; private set; } = AllyAgentRole.Soldier;
+	public AllyAgentRole agentRole { get; private set; } = AllyAgentRole.GroupLeader;
 
 
-	public RunToLocatedEnemy runToLocatedEnemy { get; private set; }
+	public GroupLeader groupLeader { get; private set; }
+	public GroupMember groupMember { get; private set; }
 	public ScoutLeader scoutLeader { get; private set; }
 	public ScoutFollow scoutFollow { get; private set; }
 	public Idle idle { get; private set; }
@@ -22,7 +23,8 @@ public class AllyAgent : SteeringAgent
 	{
 		base.CooperativeArbitration();
 
-		if(agentRole == AllyAgentRole.Soldier && runToLocatedEnemy.atShootPosition)
+		if((agentRole == AllyAgentRole.GroupLeader && groupLeader.atShootPosition)
+			|| (agentRole == AllyAgentRole.GroupMember && groupMember.atShootPosition))
 		{
 			AttackWith(attackType);
 		}
@@ -38,16 +40,21 @@ public class AllyAgent : SteeringAgent
 	{
 		agentRole = role;
 
-        runToLocatedEnemy.enabled = false;
+        groupLeader.enabled = false;
+        groupMember.enabled = false;
         scoutLeader.enabled = false;
         scoutFollow.enabled = false;
         idle.enabled = false;
-		runToLocatedEnemy.atShootPosition = false;
+		groupLeader.atShootPosition = false;
+		groupMember.atShootPosition = false;
 
         switch (agentRole)
 		{
-			case AllyAgentRole.Soldier:
-				runToLocatedEnemy.enabled = true;
+			case AllyAgentRole.GroupLeader:
+				groupLeader.enabled = true;
+                break;
+			case AllyAgentRole.GroupMember:
+				groupMember.enabled = true;
                 break;
 			case AllyAgentRole.OnBreak:
 				idle.enabled = true;
@@ -67,12 +74,14 @@ public class AllyAgent : SteeringAgent
 
 	public void AddAllComponents()
 	{
-        gameObject.AddComponent<RunToLocatedEnemy>();
+        gameObject.AddComponent<GroupLeader>();
+        gameObject.AddComponent<GroupMember>();
         gameObject.AddComponent<ScoutLeader>();
         gameObject.AddComponent<ScoutFollow>();
         gameObject.AddComponent<Idle>();
 
-		runToLocatedEnemy = GetComponent<RunToLocatedEnemy>();
+		groupLeader = GetComponent<GroupLeader>();
+		groupMember = GetComponent<GroupMember>();
 		scoutLeader = GetComponent<ScoutLeader>();
 		scoutFollow = GetComponent<ScoutFollow>();
 		idle = GetComponent<Idle>();

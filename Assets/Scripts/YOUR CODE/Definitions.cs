@@ -2,8 +2,9 @@ using UnityEngine;
 
 public enum AllyAgentRole
 {
-    Soldier = 0,
-    LeadScout = 1,
-    FollowerScout = 2,
-    OnBreak = 3
+    GroupLeader = 0,
+    GroupMember = 1,
+    LeadScout = 2,
+    FollowerScout = 3,
+    OnBreak = 4
 }
