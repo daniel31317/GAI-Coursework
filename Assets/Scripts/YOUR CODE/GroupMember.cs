@@ -80,11 +80,11 @@ public class GroupMember : SteeringBehaviour
             {
                 float distSqr = Vector2.SqrMagnitude(transform.position - AllyManager.Instance.m_agents[i].transform.position);
 
-                if(distSqr < 25 && distSqr > 0)
+                if(distSqr <= 4 && distSqr > 0)
                 {
                     Vector2 pushForce = transform.position - AllyManager.Instance.m_agents[i].transform.position;
 
-                    totalForce += pushForce / 4;
+                    totalForce += pushForce;
                     amountOfAlliesNearby++;
                 }
 
