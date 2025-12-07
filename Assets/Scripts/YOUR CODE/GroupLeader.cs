@@ -73,7 +73,11 @@ public class GroupLeader : SteeringBehaviour
         {
             return;
         }
-        
+        else if (currentPath.Count == 0 && !atShootPosition)
+        {
+            AllyManager.Instance.AssignRoles();
+        }
+
         if (currentPathIndex < currentPath.Count - 1)
         {
             float distanceToCurrentNode = Vector3.SqrMagnitude(transform.position - currentTargetPos);
@@ -82,14 +86,14 @@ public class GroupLeader : SteeringBehaviour
             {
                 //get new node
                 currentPathIndex++;
-                if(currentPathIndex == currentPath.Count - 1)
+                if (currentPathIndex == currentPath.Count - 1)
                 {
-                    currentTargetPos = (Vector3)currentPath[currentPathIndex].position + new Vector3(0.5f, 0.5f,0f);
+                    currentTargetPos = (Vector3)currentPath[currentPathIndex].position + new Vector3(0.5f, 0.5f, 0f);
                 }
                 else
                 {
                     currentTargetPos = GenerateNewTargetPosWithOffset(currentPath[currentPathIndex]);
-                }       
+                }
             }
         }
         else
@@ -99,7 +103,7 @@ public class GroupLeader : SteeringBehaviour
             if (distanceToCurrentNode < 0.001f)
             {
                 atShootPosition = true;
-            }          
+            }
         }
     }
 

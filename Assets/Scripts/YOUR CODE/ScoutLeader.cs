@@ -59,6 +59,17 @@ public class ScoutLeader : SteeringBehaviour
             }
         }
 
+
+        if(currentPath == null)
+        {
+            if(returningToBase)
+            {
+                currentClosestNode = GridData.Instance.GetNodeAt(AllyManager.Instance.currentBasePosition);
+                PathfindToNewNode();
+            }
+            return;
+        }
+
         //if there is not already a current path and there are nodes to scout
         if (currentPath.Count == 0 && AllyManager.ScoutManager.nodesToScout.Count > 0)
         {

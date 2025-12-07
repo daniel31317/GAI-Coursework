@@ -606,6 +606,14 @@ public static class Algorithms
         {
             for (int y = -1; y <= 1; y++)
             {
+                Vector2 checkPos = currentNode.position + new Vector2(x, y);
+
+                if(checkPos.x < 0 || checkPos.y < 0 || checkPos.x >= 100 || checkPos.y >= 100)
+                {
+                    totalForce += (Vector2)currentPosition - (currentNode.position + new Vector2(x, y));
+                    continue;
+                }
+
                 if (GameData.Instance.Map.GetTerrainAt((int)currentNode.position.x + x, (int)currentNode.position.y + y) == Map.Terrain.Tree)
                 {
                     totalForce += (Vector2)currentPosition - (currentNode.position + new Vector2(x, y));

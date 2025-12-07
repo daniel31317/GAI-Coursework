@@ -97,14 +97,31 @@ public class AllyManager : MonoBehaviour
             }
         }
 
-        if (amountActive == 0)
+        if (amountActive == 0 && !AnyVisibleEnemies())
         {
             AssignRoles();
             currentEnemyGroup = new EnemyGroup(false);
         }
     }
 
-
+    private bool AnyVisibleEnemies()
+    {
+        for(int i = 0; i < m_agents.Count; i++)
+        {
+            for(int j = 0; j < GameData.Instance.enemies.Count; j++)
+            {
+                if(!GameData.Instance.enemies[j].gameObject.activeSelf)
+                {
+                    continue;
+                } 
+                if (Algorithms.IsPositionInLineOfSight((Vector2)m_agents[i].transform.position, (Vector2)GameData.Instance.enemies[j].transform.position))
+                {
+                    return true;
+                }
+            }         
+        }
+        return false;
+    }
 
 
 
@@ -147,6 +164,7 @@ public class AllyManager : MonoBehaviour
         if (m_agents.Count > 0)
         {
             m_agents[0].SwitchAgentRole(AllyAgentRole.GroupLeader);
+            groupLeader = m_agents[0];
         }
     }
 }
