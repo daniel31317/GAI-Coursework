@@ -15,7 +15,6 @@ public class AllyManager : MonoBehaviour
     public const int viewDistance = 31;
     public const int viewDistanceSqr = 961;
 
-    public EnemyGroup currentEnemyGroup = new EnemyGroup(false);
 
     public Vector3 currentBasePosition { get; private set; }
     public AllyAgent groupLeader { get; private set; }
@@ -82,25 +81,9 @@ public class AllyManager : MonoBehaviour
         }
 
 
-        if(!currentEnemyGroup.isRealGroup)
-        {
-            return;
-        }
-
-        int amountActive = 0;
-
-        for (int i = 0; i < currentEnemyGroup.Enemies.Count; i++)
-        {
-            if ((currentEnemyGroup.Enemies[i].gameObject.activeSelf))
-            {
-                amountActive++;
-            }
-        }
-
-        if (amountActive == 0 && !AnyVisibleEnemies())
+        if (!AnyVisibleEnemies())
         {
             AssignRoles();
-            currentEnemyGroup = new EnemyGroup(false);
         }
     }
 
@@ -130,8 +113,6 @@ public class AllyManager : MonoBehaviour
         Vector3 enemyPosition = enemyToAttack.transform.position;
 
         Node enemyNode = GridData.Instance.GetNodeAt(enemyPosition);
-
-        currentEnemyGroup = EnemyManager.Instance.GetGroupIncludingThisEnemy(enemyToAttack);
 
         List<Node> currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(currentBasePosition), enemyNode);
 

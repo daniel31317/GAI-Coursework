@@ -15,3 +15,5 @@ Add state machines maybe
 Clean up code
 
 Fix pathfinding if pathfinding the own tile
+
+Remove enemy manager if no longer needed
