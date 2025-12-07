@@ -135,6 +135,10 @@ public class AllyManager : MonoBehaviour
 
         List<Node> currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(currentBasePosition), enemyNode);
 
+        if(currentPath == null)
+        {
+            AssignRoles();
+        }
 
         for (int i = 0; i < m_agents.Count; i++)
         {

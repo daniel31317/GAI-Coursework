@@ -2,10 +2,6 @@ Handle ally being stuck
 
 Target multiple enemies then shoot
 
-Moving to another group of enemies
-
-Handle scouts dying 
-
 Add idle to allies waiting
 
 Remove profiler

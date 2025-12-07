@@ -26,9 +26,15 @@ public class GroupMember : SteeringBehaviour
         float clippedSpeed = Mathf.Min(rampedSpeed, SteeringAgent.MaxCurrentSpeed);
 
         //get desired velocity to the point
-        desiredVelocity = (clippedSpeed / distance) * targetOffset;
-
-        
+        if(distance == 0)
+        {
+            desiredVelocity = Vector3.zero;
+        }
+        else
+        {
+            desiredVelocity = (clippedSpeed / distance) * targetOffset;
+        }
+                    
         //divide by big number so they allys dont move but look the right way
         if (atShootPosition)
         {
