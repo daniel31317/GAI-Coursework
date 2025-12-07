@@ -4,6 +4,8 @@ Target multiple enemies then shoot
 
 Add idle to allies waiting
 
+Avoid and shootback rockets
+
 Remove profiler
 
 Comment

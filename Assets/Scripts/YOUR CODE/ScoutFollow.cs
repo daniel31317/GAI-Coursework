@@ -18,14 +18,18 @@ public class ScoutFollow : SteeringBehaviour
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
-        if(catchingUp)
+        Vector2 avoid = Vector2.zero;
+        if (catchingUp)
         {
             HandleCatchingUpToScoutLeaderPathfinding();
         }
+        else
+        {
+            avoid = Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
+        }
 
-        desiredVelocity = Vector3.Normalize(currentTargetPos - transform.position) * SteeringAgent.MaxCurrentSpeed;
 
-        Vector2 avoid = Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
+        desiredVelocity = Vector3.Normalize(currentTargetPos - transform.position) * SteeringAgent.MaxCurrentSpeed;        
         desiredVelocity += (Vector3)avoid;
 
         //calculate steering velocity

@@ -68,8 +68,10 @@ public class GroupLeader : SteeringBehaviour
                 currentTargetPos = currentEnemyPosition.transform.position;
                 return;
             }
-            else
+            else if(currentPath != null)
             {
+                Node enemyNode = GridData.Instance.GetNodeAt(currentEnemyPosition.transform.position);
+                currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), enemyNode);
                 atShootPosition = false;
             }
         }
