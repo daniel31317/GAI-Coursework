@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -20,7 +22,7 @@ public class Idle : SteeringBehaviour
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
-
+        //check for if there are any enemies in los
         for (int j = 0; j < GameData.Instance.enemies.Count; j++)
         {
             if (!GameData.Instance.enemies[j].gameObject.activeSelf)
@@ -33,50 +35,9 @@ public class Idle : SteeringBehaviour
             }
         }
 
-        Vector3 targetPosition = Vector3.zero;
+        Vector3 targetPosition = HandleidleTurning();
 
-        if (!turning)
-        {
-            pointAhead = transform.position + transform.up;
-
-            turningRight = UnityEngine.Random.Range(0, 2) == 0 ? true : false;
-
-            pointToSide = transform.position;
-
-            pointToSide += turningRight ? (Vector2)transform.right : -(Vector2)transform.right;
-
-            xStep = pointAhead.x - pointToSide.x;
-
-            gradient = (pointAhead.y - pointToSide.y) / xStep;
-
-            c = pointAhead.y + (gradient * -pointAhead.x);
-
-            xStep /= 1000;
-
-            Mathf.Abs(xStep);
-
-            currentX = 0;
-
-            turning = true;
-
-            targetPosition = pointAhead;
-        }
-        else
-        {
-
-            if(UnityEngine.Random.Range(0f, 1000f) < 1f)
-            {
-                turning = false;
-            }
-
-            currentX += xStep * turnSpeed;
-
-            targetPosition.x = pointAhead.x - currentX;
-
-
-            targetPosition.y = gradient * targetPosition.x + c;
-
-        }
+        
 
         desiredVelocity = Vector3.Normalize(targetPosition - transform.position) * SteeringAgent.MaxCurrentSpeed;
 
@@ -86,5 +47,62 @@ public class Idle : SteeringBehaviour
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
 
         return steeringVelocity;
+    }
+
+
+
+    private Vector3 HandleidleTurning()
+    {
+        if (!turning)
+        {
+            pointAhead = transform.position + transform.up;
+
+            //get random left or right direction to trun to
+            turningRight = UnityEngine.Random.Range(0, 2) == 0 ? true : false;
+
+            pointToSide = transform.position;
+
+            pointToSide += turningRight ? (Vector2)transform.right : -(Vector2)transform.right;
+
+            //get the difference in x between the two points
+            xStep = pointAhead.x - pointToSide.x;
+
+            gradient = (pointAhead.y - pointToSide.y) / xStep;
+
+            //calculate the y-intercept of the line 
+            c = pointAhead.y + (gradient * -pointAhead.x);
+
+            //divde x step by 1000 to make the turning more gradual
+            xStep /= 1000;
+
+            //make sure its positve
+            Mathf.Abs(xStep);
+
+            currentX = 0;
+
+            turning = true;
+
+            return pointAhead;
+        }
+        else
+        {
+            Vector3 targetPosition = Vector3.zero;
+
+            //randomly stop truning
+            if (UnityEngine.Random.Range(0f, 1000f) < 1f)
+            {
+                turning = false;
+            }
+
+            //increment current x position along the line
+            currentX += xStep * turnSpeed;
+
+            //target x position on the line
+            targetPosition.x = pointAhead.x - currentX;
+
+            //get relative y pos using y = mx + c where m is gradient and c is y-intercept
+            targetPosition.y = gradient * targetPosition.x + c;
+            return targetPosition;
+        }
     }
 }
