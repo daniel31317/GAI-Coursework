@@ -2,11 +2,7 @@ Handle ally being stuck
 
 Target multiple enemies then shoot
 
-Add idle to allies waiting
-
 Avoid and shootback rockets
-
-Remove profiler
 
 Comment
 
@@ -14,6 +10,4 @@ Add state machines maybe
 
 Clean up code
 
-Fix pathfinding if pathfinding the own tile
-
-Remove enemy manager if no longer needed
+remove materials and prefabs

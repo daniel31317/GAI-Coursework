@@ -82,7 +82,6 @@ public static class Algorithms
 
     public static List<Node> AStar(Node startNode, Node endNode, Node avoidNode, float avoidDistance, bool hasThresHold)
     {
-        Profiler.BeginSample("A star algo");
         ResetNodesToDefaualt(nodesToReset);
 
         //since we dont path find around enemies but we are close by so it shouldn't take that long to get it so skip if we reach this thresh hold
@@ -111,7 +110,6 @@ public static class Algorithms
 
             if (openNodeList[0] == endNode)
             {
-                Profiler.EndSample();
                 return GetFoundPath(endNode);
             }
 
@@ -497,13 +495,11 @@ public static class Algorithms
 
             nodesToReset.Add(nodesToSearch[0]);
 
-            Profiler.BeginSample("Remove Nodes");
             if (nodesToSearch.Count > 0)
             {
                 Node referenceNode = nodesToSearch[0];
                 nodesToSearch.RemoveAll(n => IsNodeInRange(referenceNode, n, removeNodesInDistance));
             }
-            Profiler.EndSample();
 
             if(nodes.nodesInLos.Count > 100)
             {

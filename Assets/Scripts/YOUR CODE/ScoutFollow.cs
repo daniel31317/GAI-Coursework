@@ -29,9 +29,12 @@ public class ScoutFollow : SteeringBehaviour
         }
 
 
-        desiredVelocity = Vector3.Normalize(currentTargetPos - transform.position) * SteeringAgent.MaxCurrentSpeed;        
+        desiredVelocity = currentTargetPos - transform.position;        
         desiredVelocity += (Vector3)avoid;
 
+        desiredVelocity.Normalize();
+
+        desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
         //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
 
