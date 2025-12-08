@@ -6,8 +6,6 @@ Avoid and shootback rockets
 
 Comment
 
-Add state machines maybe
-
 Clean up code
 
 remove materials and prefabs
