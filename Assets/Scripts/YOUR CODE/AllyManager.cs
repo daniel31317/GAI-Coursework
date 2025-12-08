@@ -15,6 +15,7 @@ public class AllyManager : MonoBehaviour
     public const int viewDistance = 31;
     public const int viewDistanceSqr = 961;
 
+    private bool rolesAssigned = false; 
 
     public Vector3 currentBasePosition { get; private set; }
     public AllyAgent groupLeader { get; private set; }
@@ -62,6 +63,8 @@ public class AllyManager : MonoBehaviour
 
 
         currentBasePosition = positionTotal / m_agents.Count;
+
+        rolesAssigned = true;
     }
 
 
@@ -81,7 +84,7 @@ public class AllyManager : MonoBehaviour
         }
 
 
-        if (!AnyVisibleEnemies())
+        if (!AnyVisibleEnemies() && !rolesAssigned)
         {
             AssignRoles();
         }
@@ -110,6 +113,8 @@ public class AllyManager : MonoBehaviour
 
     public void FoundEnemyToAttack(EnemyAgent enemyToAttack)
     {
+        rolesAssigned = false;
+
         Vector3 enemyPosition = enemyToAttack.transform.position;
 
         Node enemyNode = GridData.Instance.GetNodeAt(enemyPosition);
