@@ -27,6 +27,7 @@ public class ScoutManager : ScriptableObject
         followScout = newAgent;
         followScout.SwitchAgentRole(AllyAgentRole.FollowerScout);
         leadScout.scoutLeader.SetFollowerScout(followScout);
+        followScout.scoutFollow.SetLeader(leadScout);
     }
 
     private void ScoutPositionToCheck(Vector3 pos)

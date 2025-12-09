@@ -9,8 +9,6 @@ public class ScoutLeader : SteeringBehaviour
     private int currentPathIndex = 0;
 
     private Vector3 currentTargetPos = new Vector3();
-    private List<Vector3> previousTargetPositions = new List<Vector3>();
-
     private bool returningToBase = false;
     private bool scoutCatchingUp = false;
 
@@ -27,7 +25,20 @@ public class ScoutLeader : SteeringBehaviour
         //get desired velocity to the point
         desiredVelocity = Vector3.Normalize(currentTargetPos - transform.position) * SteeringAgent.MaxCurrentSpeed;
 
-        scoutCatchingUp = Vector3.SqrMagnitude(transform.position - followerScout.transform.position) >= (AllyManager.viewDistance / 2) * (AllyManager.viewDistance / 2);
+        float distanceSqr = Vector3.SqrMagnitude(transform.position - followerScout.transform.position);
+        bool isInLos = Algorithms.IsPositionInLineOfSight(transform.position, followerScout.transform.position);
+
+
+        scoutCatchingUp = false;
+
+        if(distanceSqr >= 4 && !isInLos)
+        {
+            scoutCatchingUp = true;
+        }
+        else if(distanceSqr >= 100)
+        {
+            scoutCatchingUp = true;
+        }
 
         //if scout has fallen behind wait for it to catch up by it pathfinding
         if (scoutCatchingUp)
@@ -86,7 +97,7 @@ public class ScoutLeader : SteeringBehaviour
             IsThereACloserNode();
         }
 
-        if (currentPathIndex < currentPath.Count)
+        if (currentPathIndex <= currentPath.Count)
         {
             float distanceToCurrentNode = Vector3.SqrMagnitude(transform.position - currentTargetPos);
 
@@ -94,19 +105,12 @@ public class ScoutLeader : SteeringBehaviour
             {
                 //get new node
                 currentPathIndex++;
-                if(currentPathIndex == currentPath.Count)
+                if(currentPathIndex >= currentPath.Count)
                 {
                     return;
                 }
                 currentTargetPos = Algorithms.GenerateNewTargetPosWithOffset(currentPath[currentPathIndex]);
-                previousTargetPositions.Add(currentTargetPos);
-                if (currentPathIndex >= 2)
-                {
-                    followerScout.GetComponent<ScoutFollow>().SetTargetPos(previousTargetPositions[currentPathIndex - 2]);
-                }
-
-
-                //reached final node
+               //reached final node
                 if (currentPathIndex == currentPath.Count - 1 && !returningToBase)
                 {
                     AllyManager.ScoutManager.RemoveScoutedNode(currentClosestNode);
@@ -132,8 +136,6 @@ public class ScoutLeader : SteeringBehaviour
 
             //set current target 
             currentTargetPos = Algorithms.GenerateNewTargetPosWithOffset(currentPath[0]);
-            previousTargetPositions.Clear();
-            previousTargetPositions.Add(currentTargetPos);
             currentPathIndex = 0;
         }
     }
@@ -157,7 +159,6 @@ public class ScoutLeader : SteeringBehaviour
         currentPathIndex = 0;
 
         currentTargetPos = new Vector3();
-        previousTargetPositions = new List<Vector3>();
 
         returningToBase = false;
         scoutCatchingUp = false;

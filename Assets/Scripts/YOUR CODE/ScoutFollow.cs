@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -13,27 +14,47 @@ public class ScoutFollow : SteeringBehaviour
     private List<Node> currentPath = new List<Node>();
     private int currentPathIndex = 0;
     public bool catchingUp { get; private set; } = false;
-
+    private AllyAgent leaderScout;
 
 
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
         Profiler.BeginSample("ScoutFollow UpdateBehaviour");
-        Vector2 avoid = Vector2.zero;
+
+
         if (catchingUp)
         {
             HandleCatchingUpToScoutLeaderPathfinding();
+            desiredVelocity = currentTargetPos - transform.position;
         }
         else
         {
-            avoid = Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
+            currentTargetPos = leaderScout.transform.position - (leaderScout.transform.up * 2);
+
+            Vector3 targetOffset = currentTargetPos - transform.position;
+
+            float distance = targetOffset.magnitude;
+
+            float rampedSpeed = SteeringAgent.MaxCurrentSpeed * (distance / 2f);
+
+            float clippedSpeed = Mathf.Min(rampedSpeed, SteeringAgent.MaxCurrentSpeed);
+
+            //get desired velocity to the point
+            if (distance == 0)
+            {
+                desiredVelocity = Vector3.zero;
+            }
+            else
+            {
+                desiredVelocity = (clippedSpeed / distance) * targetOffset;
+            }
+
+            desiredVelocity += (Vector3)Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
         }
 
-
+           
         desiredVelocity = currentTargetPos - transform.position;        
-        desiredVelocity += (Vector3)avoid;
-
         desiredVelocity.Normalize();
 
         desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
@@ -43,13 +64,6 @@ public class ScoutFollow : SteeringBehaviour
         return steeringVelocity;
     }
 
-
-
-
-    public void SetTargetPos(Vector3 targetPos)
-    { 
-        currentTargetPos = targetPos;
-    }
 
 
     //pathfind to leader scout if this scout has fallen too far behind
@@ -67,7 +81,7 @@ public class ScoutFollow : SteeringBehaviour
     //handles setting the current target position on the path for the scout follower
     private void HandleCatchingUpToScoutLeaderPathfinding()
     {
-        if (currentPathIndex < currentPath.Count - 1)
+        if (currentPathIndex <= currentPath.Count)
         {
             float distanceToCurrentNode = Vector3.SqrMagnitude(transform.position - currentTargetPos);
 
@@ -75,6 +89,11 @@ public class ScoutFollow : SteeringBehaviour
             {
                 //get new node
                 currentPathIndex++;
+                if(currentPathIndex >= currentPath.Count)
+                {
+                    catchingUp = false;
+                    return;
+                }
                 currentTargetPos = Algorithms.GenerateNewTargetPosWithOffset(currentPath[currentPathIndex]);
 
                 //reached final node
@@ -86,5 +105,11 @@ public class ScoutFollow : SteeringBehaviour
         }
     }
 
+
+
+    public void SetLeader(AllyAgent leader)
+    {
+        leaderScout = leader;
+    }
 
 }

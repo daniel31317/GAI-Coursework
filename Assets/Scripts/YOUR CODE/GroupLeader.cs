@@ -130,7 +130,11 @@ public class GroupLeader : SteeringBehaviour
 
     public void SetCurrentPath(List<Node> path)
     {
-        currentPath = path;
+        if (path == null || path.Count == 0)
+        {
+            return;
+        }
+        currentPath = path;      
         currentTargetPos = currentPath[0].position;
         currentPathIndex = 0;
         atShootPosition = false;
