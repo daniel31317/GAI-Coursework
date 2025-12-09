@@ -15,6 +15,19 @@ public static class Algorithms
     {
         ResetNodesToDefaualt();
 
+        if (endNode.terrain == Map.Terrain.Tree)
+        {
+            List<Node> neighbours = GridData.Instance.GetNeighbouringNodesAt(endNode.position);
+            for (int i = 0; i < neighbours.Count; i++)
+            {
+                if (neighbours[i].terrain != Map.Terrain.Tree)
+                {
+                    endNode = neighbours[i];
+                    break;
+                }
+            }
+        }
+
         int visitOrder = 0;
         List<Node> openNodeList = new List<Node>();
         
