@@ -100,6 +100,10 @@ public class ScoutLeader : SteeringBehaviour
         {
             AllyManager.Instance.FoundEnemyToAttack(closestEnemy);
         }
+        else
+        {
+            AllyManager.ScoutManager.RemoveScoutedNode(currentClosestNode);
+        }
     }
 
 

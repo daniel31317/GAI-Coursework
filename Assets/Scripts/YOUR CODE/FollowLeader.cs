@@ -101,10 +101,14 @@ public class FollowLeader : SteeringBehaviour
 
     //pathfind to leader scout if this scout has fallen too far behind
     public void CatchUpToLeader()
-    {
+    {      
+        currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), GridData.Instance.GetNodeAt(leader.transform.position));
+        if(currentPath == null)
+        {
+            return;
+        }
         catchingUp = true;
         currentPathIndex = 0;
-        currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), GridData.Instance.GetNodeAt(leader.transform.position));
         currentPath.Remove(GridData.Instance.GetNodeAt(transform.position));
         currentTargetPos = Algorithms.GenerateNewTargetPosWithOffset(currentPath[0]);
     }
@@ -139,11 +143,6 @@ public class FollowLeader : SteeringBehaviour
             {
                 //get new node
                 currentPathIndex++;
-                if(currentPathIndex >= currentPath.Count)
-                {
-                    catchingUp = false;
-                    return;
-                }
                 currentTargetPos = Algorithms.GenerateNewTargetPosWithOffset(currentPath[currentPathIndex]);
 
                 //reached final node

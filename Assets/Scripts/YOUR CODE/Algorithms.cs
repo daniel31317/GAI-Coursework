@@ -78,91 +78,6 @@ public static class Algorithms
         return GetFoundPath(null);
     }
 
-
-
-    public static List<Node> AStar(Node startNode, Node endNode, Node avoidNode, float avoidDistance, bool hasThresHold)
-    {
-        ResetNodesToDefaualt(nodesToReset);
-
-        //since we dont path find around enemies but we are close by so it shouldn't take that long to get it so skip if we reach this thresh hold
-        const int maxIterations = 200; 
-        float avoidDistanceSqr = avoidDistance * avoidDistance; 
-
-        endNode.Reset();
-
-        int visitOrder = 0;
-        List<Node> openNodeList = new List<Node>();
-        
-
-        startNode.onOpenList = true;
-
-        openNodeList.Add(startNode);
-        nodesToReset.Add(startNode);
-
-        while (openNodeList.Count > 0)
-        {
-            openNodeList.Sort();
-
-            //openNodeList[0] = currentNode
-            openNodeList[0].onOpenList = false;
-            openNodeList[0].onClosedList = true;
-            openNodeList[0].visitOrder = visitOrder++;
-
-            if (openNodeList[0] == endNode)
-            {
-                return GetFoundPath(endNode);
-            }
-
-            if(hasThresHold && visitOrder > maxIterations)
-            {
-                return GetFoundPath(null);
-            }
-
-            for (int i = 0; i < openNodeList[0].neighbours.Count; i++)
-            {
-                Node childNode = openNodeList[0].neighbours[i];
-                if (!childNode.onClosedList)
-                {
-                    int g = openNodeList[0].g + CalculateInitialCost(openNodeList[0].position, childNode.position);
-                    int h = ManhattanDistanceHeuristic(childNode.position, endNode.position);
-                    int f = g + h;
-
-                    if (childNode.terrain == Map.Terrain.Mud)
-                    {
-                        f *= 2;
-                    }
-                    else if (childNode.terrain == Map.Terrain.Water)
-                    {
-                        f *= 4;
-                    }
-
-                    //avoid going in range of enemy but still pathfind if needed
-                    if (childNode.SqrMagnitude(avoidNode) < avoidDistanceSqr)
-                    {
-                        f *= 1000;
-                    }
-
-                    if (f <= childNode.f || !childNode.onOpenList)
-                    {
-                        childNode.f = f;
-                        childNode.g = g;
-                        childNode.SetParent(openNodeList[0]);
-                    }
-                    if (!childNode.onOpenList)
-                    {
-                        childNode.onOpenList = true;
-                        openNodeList.Add(childNode);
-                        nodesToReset.Add(childNode);
-                    }
-                }
-            }
-
-            openNodeList.RemoveAt(0);
-        }
-
-        return GetFoundPath(null);
-    }
-
     public static void ResetNodesToDefaualt(List<Node> nodes)
     {
         for (int i = 0; i < nodes.Count; i++)
@@ -355,6 +270,7 @@ public static class Algorithms
 
         startNode.onOpenList = true;
         openList.Add(startNode);
+        nodesToReset.Add(startNode);
 
         //score every single possible grid we can go to using a scoring system simlar to dijsktra but wiht no sorting
         while (openList.Count > 0)
@@ -382,6 +298,7 @@ public static class Algorithms
                         currentNode.neighbours[i].SetParent(currentNode);
                         currentNode.neighbours[i].onOpenList = true;
                         openList.Add(currentNode.neighbours[i]);
+                        nodesToReset.Add(currentNode.neighbours[i]);
                     }
                 }
             }
