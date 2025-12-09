@@ -7,5 +7,3 @@ Avoid and shootback rockets
 Comment
 
 Clean up code
-
-remove materials and prefabs
