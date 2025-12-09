@@ -103,10 +103,6 @@ public class FollowLeader : SteeringBehaviour
     public void CatchUpToLeader()
     {      
         currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), GridData.Instance.GetNodeAt(leader.transform.position));
-        if(currentPath == null)
-        {
-            return;
-        }
         catchingUp = true;
         currentPathIndex = 0;
         currentPath.Remove(GridData.Instance.GetNodeAt(transform.position));
