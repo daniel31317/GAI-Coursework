@@ -11,6 +11,7 @@ using static UnityEngine.GraphicsBuffer;
 public class FollowLeader : SteeringBehaviour
 {
     private Vector3 currentTargetPos = new Vector3();
+    private Vector3 dodgeRocketForce = new Vector3();
     private List<Node> currentPath = new List<Node>();
     private int currentPathIndex = 0;
     public bool catchingUp { get; private set; } = false;
@@ -74,6 +75,9 @@ public class FollowLeader : SteeringBehaviour
 
                 desiredVelocity += (Vector3)Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
                 desiredVelocity += (Vector3)Algorithms.CalcualteSeperationForce(gameObject);
+
+                
+
             }
             else
             {
@@ -81,7 +85,13 @@ public class FollowLeader : SteeringBehaviour
             }
             
         }
-                
+
+        if (dodgeRocketForce != Vector3.zero)
+        {
+            desiredVelocity += dodgeRocketForce * SteeringAgent.MaxCurrentSpeed;
+            dodgeRocketForce = Vector3.zero;
+        }
+
         desiredVelocity.Normalize();
         desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
 
@@ -154,6 +164,12 @@ public class FollowLeader : SteeringBehaviour
     public void SetLeader(AllyAgent leader)
     {
         this.leader = leader;
+    }
+
+
+    public void AdddodgeRocketForce(Vector3 force)
+    {
+        dodgeRocketForce += force;
     }
 
 }
