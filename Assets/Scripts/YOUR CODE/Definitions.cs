@@ -3,8 +3,7 @@ using UnityEngine;
 public enum AllyAgentRole
 {
     GroupLeader = 0,
-    GroupMember = 1,
+    FollowLeader = 1,
     LeadScout = 2,
-    FollowerScout = 3,
-    OnBreak = 4
+    Idle = 3
 }

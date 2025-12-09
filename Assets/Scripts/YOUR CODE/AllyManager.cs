@@ -55,7 +55,7 @@ public class AllyManager : MonoBehaviour
             }
             else
             {
-                m_agents[i].SwitchAgentRole(AllyAgentRole.OnBreak);
+                m_agents[i].SwitchAgentRole(AllyAgentRole.Idle, null);
             }
 
             positionTotal += m_agents[i].transform.position;
@@ -130,13 +130,13 @@ public class AllyManager : MonoBehaviour
         {
             if(i == 0)
             {
-                m_agents[i].SwitchAgentRole(AllyAgentRole.GroupLeader);
+                m_agents[i].SwitchAgentRole(AllyAgentRole.GroupLeader, null);
                 m_agents[i].groupLeader.SetCurrentPath(currentPath);
                 groupLeader = m_agents[i];
             }
             else
             {
-                m_agents[i].SwitchAgentRole(AllyAgentRole.GroupMember);
+                m_agents[i].SwitchAgentRole(AllyAgentRole.FollowLeader, groupLeader);
             }
 
                 
@@ -145,16 +145,20 @@ public class AllyManager : MonoBehaviour
 
 
 
-
-
-
-
     public void AssignNewGroupLeader()
     {
         if (m_agents.Count > 0)
         {
-            m_agents[0].SwitchAgentRole(AllyAgentRole.GroupLeader);
+            m_agents[0].SwitchAgentRole(AllyAgentRole.GroupLeader, null);
             groupLeader = m_agents[0];
+
+            if(m_agents.Count > 1)
+            {
+                for(int i = 1; i < m_agents.Count; i++)
+                {
+                    m_agents[i].SwitchAgentRole(AllyAgentRole.FollowLeader, groupLeader);
+                }
+            }
         }
     }
 }

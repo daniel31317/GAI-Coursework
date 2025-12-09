@@ -13,7 +13,6 @@ public class ScoutLeader : SteeringBehaviour
     private bool scoutCatchingUp = false;
 
     private Node currentClosestNode;
-    private AllyAgent followerScout;
 
     private EnemyAgent closestEnemy;
 
@@ -23,32 +22,12 @@ public class ScoutLeader : SteeringBehaviour
         HandleIfAllyNeedsNewNodeToPathfind();
 
         //get desired velocity to the point
-        desiredVelocity = Vector3.Normalize(currentTargetPos - transform.position) * SteeringAgent.MaxCurrentSpeed;
-
-        float distanceSqr = Vector3.SqrMagnitude(transform.position - followerScout.transform.position);
-        bool isInLos = Algorithms.IsPositionInLineOfSight(transform.position, followerScout.transform.position);
-
-
-        scoutCatchingUp = false;
-
-        if(distanceSqr >= 4 && !isInLos)
-        {
-            scoutCatchingUp = true;
-        }
-        else if(distanceSqr >= 100)
-        {
-            scoutCatchingUp = true;
-        }
+        desiredVelocity = Vector3.Normalize(currentTargetPos - transform.position) * SteeringAgent.MaxCurrentSpeed;      
 
         //if scout has fallen behind wait for it to catch up by it pathfinding
         if (scoutCatchingUp)
         {
             desiredVelocity /= 10000f;
-            ScoutFollow scoutFollowScript = followerScout.gameObject.GetComponent<ScoutFollow>();
-            if (scoutFollowScript != null && !scoutFollowScript.catchingUp)
-            {
-                followerScout.gameObject.GetComponent<ScoutFollow>().CatchUpToScout(this);
-            }
         }
 
         //calculate steering velocity
@@ -164,15 +143,9 @@ public class ScoutLeader : SteeringBehaviour
         scoutCatchingUp = false;
 
         currentClosestNode = null;
-        followerScout = null;
 
         closestEnemy = null;
     }
 
 
-
-    public void SetFollowerScout(AllyAgent lead)
-    {
-        followerScout = lead;
-    }
 }

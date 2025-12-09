@@ -18,16 +18,14 @@ public class ScoutManager : ScriptableObject
     public void SetAgentAsScoutLead(AllyAgent newAgent)
     {
         leadScout = newAgent;
-        leadScout.SwitchAgentRole(AllyAgentRole.LeadScout);
+        leadScout.SwitchAgentRole(AllyAgentRole.LeadScout, null);
         leadScout.scoutLeader.ResetScout();
     }
 
     public void SetAgentAsScoutFollower(AllyAgent newAgent)
     {
         followScout = newAgent;
-        followScout.SwitchAgentRole(AllyAgentRole.FollowerScout);
-        leadScout.scoutLeader.SetFollowerScout(followScout);
-        followScout.scoutFollow.SetLeader(leadScout);
+        followScout.SwitchAgentRole(AllyAgentRole.FollowLeader, leadScout);
     }
 
     private void ScoutPositionToCheck(Vector3 pos)

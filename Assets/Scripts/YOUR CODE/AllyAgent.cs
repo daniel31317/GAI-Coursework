@@ -8,9 +8,8 @@ public class AllyAgent : SteeringAgent
 
 
 	public GroupLeader groupLeader { get; private set; }
-	public GroupMember groupMember { get; private set; }
 	public ScoutLeader scoutLeader { get; private set; }
-	public ScoutFollow scoutFollow { get; private set; }
+	public FollowLeader followLeader { get; private set; }
 	public Idle idle { get; private set; }
 
     protected override void InitialiseFromAwake()
@@ -24,7 +23,7 @@ public class AllyAgent : SteeringAgent
 		base.CooperativeArbitration();
 
         if ((agentRole == AllyAgentRole.GroupLeader && groupLeader.atShootPosition)
-			|| (agentRole == AllyAgentRole.GroupMember && groupMember.atShootPosition))
+			|| (agentRole == AllyAgentRole.FollowLeader && followLeader.atShootPosition))
 		{
 			AttackWith(attackType);
 		}
@@ -36,34 +35,31 @@ public class AllyAgent : SteeringAgent
 	}
 
 
-	public void SwitchAgentRole(AllyAgentRole role)
+	public void SwitchAgentRole(AllyAgentRole role, AllyAgent leader)
 	{
 		agentRole = role;
 
         groupLeader.enabled = false;
-        groupMember.enabled = false;
+        followLeader.enabled = false;
         scoutLeader.enabled = false;
-        scoutFollow.enabled = false;
         idle.enabled = false;
 		groupLeader.atShootPosition = false;
-		groupMember.atShootPosition = false;
+        followLeader.atShootPosition = false;
 
         switch (agentRole)
 		{
 			case AllyAgentRole.GroupLeader:
 				groupLeader.enabled = true;
                 break;
-			case AllyAgentRole.GroupMember:
-				groupMember.enabled = true;
+			case AllyAgentRole.FollowLeader:
+                followLeader.enabled = true;
+                followLeader.SetLeader(leader);
                 break;
-			case AllyAgentRole.OnBreak:
+			case AllyAgentRole.Idle:
 				idle.enabled = true;
                 break;
             case AllyAgentRole.LeadScout:
                 scoutLeader.enabled = true;
-                break;
-            case AllyAgentRole.FollowerScout:
-                scoutFollow.enabled = true;
                 break;
         }
         
@@ -75,15 +71,13 @@ public class AllyAgent : SteeringAgent
 	public void AddAllComponents()
 	{
         gameObject.AddComponent<GroupLeader>();
-        gameObject.AddComponent<GroupMember>();
         gameObject.AddComponent<ScoutLeader>();
-        gameObject.AddComponent<ScoutFollow>();
+        gameObject.AddComponent<FollowLeader>();
         gameObject.AddComponent<Idle>();
 
 		groupLeader = GetComponent<GroupLeader>();
-		groupMember = GetComponent<GroupMember>();
 		scoutLeader = GetComponent<ScoutLeader>();
-		scoutFollow = GetComponent<ScoutFollow>();
+		followLeader = GetComponent<FollowLeader>();
 		idle = GetComponent<Idle>();
     }
 

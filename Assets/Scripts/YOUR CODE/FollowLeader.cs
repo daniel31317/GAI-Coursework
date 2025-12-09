@@ -8,13 +8,14 @@ using UnityEngine.UIElements;
 using static UnityEngine.Analytics.IAnalytic;
 using static UnityEngine.GraphicsBuffer;
 
-public class ScoutFollow : SteeringBehaviour
+public class FollowLeader : SteeringBehaviour
 {
     private Vector3 currentTargetPos = new Vector3();
     private List<Node> currentPath = new List<Node>();
     private int currentPathIndex = 0;
     public bool catchingUp { get; private set; } = false;
-    private AllyAgent leaderScout;
+    public bool atShootPosition = false;
+    private AllyAgent leader;
 
 
 
@@ -22,6 +23,22 @@ public class ScoutFollow : SteeringBehaviour
     {
         Profiler.BeginSample("ScoutFollow UpdateBehaviour");
 
+        float distanceSqr = Vector3.SqrMagnitude(transform.position - leader.transform.position);
+        bool isInLos = Algorithms.IsPositionInLineOfSight(transform.position, leader.transform.position);
+
+
+        if(!catchingUp)
+        {
+            if (distanceSqr >= 100 && !isInLos)
+            {
+                CatchUpToLeader();
+            }
+            else if (distanceSqr >= 225)
+            {
+                CatchUpToLeader();
+            }
+        }
+        
 
         if (catchingUp)
         {
@@ -30,34 +47,50 @@ public class ScoutFollow : SteeringBehaviour
         }
         else
         {
-            currentTargetPos = leaderScout.transform.position - (leaderScout.transform.up * 2);
+            HandleAttackingEnemy();
 
-            Vector3 targetOffset = currentTargetPos - transform.position;
-
-            float distance = targetOffset.magnitude;
-
-            float rampedSpeed = SteeringAgent.MaxCurrentSpeed * (distance / 2f);
-
-            float clippedSpeed = Mathf.Min(rampedSpeed, SteeringAgent.MaxCurrentSpeed);
-
-            //get desired velocity to the point
-            if (distance == 0)
+            if(!atShootPosition)
             {
-                desiredVelocity = Vector3.zero;
+
+                // use of arrival https://www.red3d.com/cwr/papers/1999/gdc99steer.pdf
+                currentTargetPos = leader.transform.position - (leader.transform.up * 2);
+
+                Vector3 targetOffset = currentTargetPos - transform.position;
+
+                float distance = targetOffset.magnitude;
+
+                float rampedSpeed = SteeringAgent.MaxCurrentSpeed * (distance / 2f);
+
+                float clippedSpeed = Mathf.Min(rampedSpeed, SteeringAgent.MaxCurrentSpeed);
+
+                //get desired velocity to the point
+                if (distance == 0)
+                {
+                    desiredVelocity = Vector3.zero;
+                }
+                else
+                {
+                    desiredVelocity = (clippedSpeed / distance) * targetOffset;
+                }
+
+                desiredVelocity += (Vector3)Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
+                desiredVelocity += (Vector3)Algorithms.CalcualteSeperationForce(gameObject);
             }
             else
             {
-                desiredVelocity = (clippedSpeed / distance) * targetOffset;
+                desiredVelocity = currentTargetPos - transform.position;
             }
+            
+        }
+                
+        desiredVelocity.Normalize();
+        desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
 
-            desiredVelocity += (Vector3)Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
+        if(atShootPosition)
+        {
+            desiredVelocity /= 10f;
         }
 
-           
-        desiredVelocity = currentTargetPos - transform.position;        
-        desiredVelocity.Normalize();
-
-        desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
         //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
         Profiler.EndSample();
@@ -67,7 +100,7 @@ public class ScoutFollow : SteeringBehaviour
 
 
     //pathfind to leader scout if this scout has fallen too far behind
-    public void CatchUpToScout(ScoutLeader leader)
+    public void CatchUpToLeader()
     {
         catchingUp = true;
         currentPathIndex = 0;
@@ -78,10 +111,27 @@ public class ScoutFollow : SteeringBehaviour
 
 
 
+    private void HandleAttackingEnemy()
+    {
+        EnemyAgent currentEnemyPosition = Algorithms.GetClosestEnemyInLos(transform.position);
+        if (currentEnemyPosition != null)
+        {
+            if (Vector3.SqrMagnitude(transform.position - currentEnemyPosition.transform.position) <= Attack.AllyGunData.range * Attack.AllyGunData.range)
+            {
+                currentTargetPos = currentEnemyPosition.transform.position;
+                atShootPosition = true;
+                return;
+            }
+        }
+
+        atShootPosition = false;
+    }
+
+
     //handles setting the current target position on the path for the scout follower
     private void HandleCatchingUpToScoutLeaderPathfinding()
     {
-        if (currentPathIndex <= currentPath.Count)
+        if (currentPathIndex < currentPath.Count - 1)
         {
             float distanceToCurrentNode = Vector3.SqrMagnitude(transform.position - currentTargetPos);
 
@@ -109,7 +159,7 @@ public class ScoutFollow : SteeringBehaviour
 
     public void SetLeader(AllyAgent leader)
     {
-        leaderScout = leader;
+        this.leader = leader;
     }
 
 }

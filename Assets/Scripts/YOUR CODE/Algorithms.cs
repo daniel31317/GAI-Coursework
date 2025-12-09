@@ -624,5 +624,40 @@ public static class Algorithms
 
         return totalForce * SteeringAgent.MaxCurrentSpeed;
     }
+
+
+    public static Vector2 CalcualteSeperationForce(GameObject currentAgent)
+    {
+        Vector2 totalForce = Vector2.zero;
+        int amountOfAlliesNearby = 0;
+
+        for (int i = 0; i < AllyManager.Instance.m_agents.Count; i++)
+        {
+            if (AllyManager.Instance.m_agents[i].gameObject != currentAgent)
+            {
+                float distSqr = Vector2.SqrMagnitude(currentAgent.transform.position - AllyManager.Instance.m_agents[i].transform.position);
+
+                if (distSqr <= 4 && distSqr > 0)
+                {
+                    Vector2 pushForce = currentAgent.transform.position - AllyManager.Instance.m_agents[i].transform.position;
+
+                    totalForce += pushForce;
+                    amountOfAlliesNearby++;
+                }
+
+            }
+        }
+
+        //so we dont get divide by zero errors on line after if statement
+        if (amountOfAlliesNearby == 0)
+        {
+            return totalForce;
+        }
+
+        totalForce /= amountOfAlliesNearby;
+
+        return totalForce * SteeringAgent.MaxCurrentSpeed;
+    }
+
     #endregion
 }

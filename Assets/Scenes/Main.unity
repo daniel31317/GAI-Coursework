@@ -529,7 +529,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1549639962}
   - component: {fileID: 1549639963}
-  - component: {fileID: 1549639965}
   - component: {fileID: 1549639964}
   m_Layer: 0
   m_Name: Manager
@@ -565,9 +564,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc9230b52d55c314faed418957ff621f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoutBlock: {fileID: 8970850816751449026, guid: e6420253482cca3469c609ad1f26a8ae, type: 3}
-  enemyBlock: {fileID: 8970850816751449026, guid: 119b2235594c4054f8c7333b45f3f56a, type: 3}
-  moveBlock: {fileID: 8970850816751449026, guid: 12138de4ea569e5448541d54be437b1e, type: 3}
 --- !u!114 &1549639964
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -580,19 +576,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a928fe6b8777ba40ad347b193e661b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1549639965
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1549639961}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b9f2304174146540b5748c6c086a771, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Groups: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

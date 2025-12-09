@@ -1,5 +1,3 @@
-Handle ally being stuck
-
 Target multiple enemies then shoot
 
 Avoid and shootback rockets
