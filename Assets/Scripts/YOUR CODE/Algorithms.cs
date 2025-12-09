@@ -307,56 +307,6 @@ public static class Algorithms
         return closedList;
     }
 
-    public static List<Node> FindAllAccesableNodes(Node startNode, int minDistance)
-    {
-        ResetNodesToDefaualt(nodesToReset);
-
-        int minDistanceSqr = minDistance * minDistance;
-
-        List<Node> closedList = new List<Node>();
-        List<Node> openList = new List<Node>();
-
-        startNode.onOpenList = true;
-        openList.Add(startNode);
-
-        //score every single possible grid we can go to using a scoring system simlar to dijsktra but wiht no sorting
-        while (openList.Count > 0)
-        {
-            Node currentNode = openList[0];
-            openList.RemoveAt(0);
-
-            currentNode.onOpenList = false;
-            currentNode.onClosedList = true;
-
-            float distanceSqrd = Vector3.SqrMagnitude(startNode.position - currentNode.position);
-            if (distanceSqrd >= minDistanceSqr)
-            {
-                closedList.Add(currentNode);
-            }
-
-            nodesToReset.Add(currentNode);
-
-            //if we have more than 1000 nodes to look at that is probably more than enough
-            //just better for later steps not to loop though for example 8000 nodes where most of them will be useless
-            if (closedList.Count > 1000)
-            {
-                return closedList;
-            }
-
-            for (int i = 0; i < currentNode.neighbours.Count; i++)
-            {
-                if (!currentNode.neighbours[i].onClosedList && !currentNode.neighbours[i].onOpenList)
-                {
-                    currentNode.neighbours[i].SetParent(currentNode);
-                    currentNode.neighbours[i].onOpenList = true;
-                    openList.Add(currentNode.neighbours[i]);
-                }
-            }
-        }
-
-        return closedList;
-    }
-
     private static int CalculateInitialCostNoHorizontal(Vector3 pos1, Vector3 pos2)
     {
         Vector3 cost = pos2 - pos1;
@@ -388,49 +338,6 @@ public static class Algorithms
 
         return nodesOfInterest;
     }
-
-
-    public static NodesOfInterest GetNodesOfInterest(List<Node> nodesToSearch, int removeNodesInDistance, Vector2 losPos, float distance)
-    {
-        NodesOfInterest nodes = new NodesOfInterest(new List<Node>(), new List<Node>());
-
-        float distanceSqr = distance * distance;
-
-        while (nodesToSearch.Count > 0)
-        {
-            if(Vector2.SqrMagnitude(nodesToSearch[0].position - losPos) < distanceSqr)
-            {
-                nodesToSearch[0].Reset();
-                nodesToSearch.RemoveAt(0);
-                continue;
-            }
-
-            if(IsPositionInLineOfSight(nodesToSearch[0].position, losPos))
-            {
-                nodes.nodesInLos.Add(nodesToSearch[0]);
-            }
-            else
-            {
-                nodes.nodesNotLos.Add(nodesToSearch[0]);
-            }
-
-            nodesToReset.Add(nodesToSearch[0]);
-
-            if (nodesToSearch.Count > 0)
-            {
-                Node referenceNode = nodesToSearch[0];
-                nodesToSearch.RemoveAll(n => IsNodeInRange(referenceNode, n, removeNodesInDistance));
-            }
-
-            if(nodes.nodesInLos.Count > 100)
-            {
-                return nodes;
-            }
-        }
-
-        return nodes;
-    }
-
 
 
     //gets the nodes needed to be removed from the closed list based on distance to an important node
