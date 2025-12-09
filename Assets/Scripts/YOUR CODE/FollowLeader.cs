@@ -51,7 +51,6 @@ public class FollowLeader : SteeringBehaviour
 
             if(!atShootPosition)
             {
-
                 // use of arrival https://www.red3d.com/cwr/papers/1999/gdc99steer.pdf
                 currentTargetPos = leader.transform.position - (leader.transform.up * 2);
 
@@ -101,8 +100,21 @@ public class FollowLeader : SteeringBehaviour
 
     //pathfind to leader scout if this scout has fallen too far behind
     public void CatchUpToLeader()
-    {      
-        currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), GridData.Instance.GetNodeAt(leader.transform.position));
+    {
+        Node leaderNode = GridData.Instance.GetNodeAt(leader.transform.position);
+        if(leaderNode.terrain == Map.Terrain.Tree)
+        {
+            List<Node> neighbours = GridData.Instance.GetNeighbouringNodesAt(leader.transform.position);
+            for(int i = 0; i < neighbours.Count; i++)
+            {
+                if(neighbours[i].terrain != Map.Terrain.Tree)
+                {
+                    leaderNode = neighbours[i];
+                    break;
+                }
+            }
+        }
+        currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), leaderNode);
         catchingUp = true;
         currentPathIndex = 0;
         currentPath.Remove(GridData.Instance.GetNodeAt(transform.position));

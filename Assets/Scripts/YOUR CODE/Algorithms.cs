@@ -13,17 +13,14 @@ public static class Algorithms
     #region pathfinding
     public static List<Node> AStar(Node startNode, Node endNode)
     {
-        ResetNodesToDefaualt(nodesToReset);
-        endNode.Reset();
+        ResetNodesToDefaualt();
 
         int visitOrder = 0;
         List<Node> openNodeList = new List<Node>();
         
-
         startNode.onOpenList = true;
 
         openNodeList.Add(startNode);
-        nodesToReset.Add(startNode);
 
         while (openNodeList.Count > 0)
         {
@@ -67,7 +64,6 @@ public static class Algorithms
                     {
                         childNode.onOpenList = true;
                         openNodeList.Add(childNode);
-                        nodesToReset.Add(childNode);
                     }
                 }
             }
@@ -78,13 +74,12 @@ public static class Algorithms
         return GetFoundPath(null);
     }
 
-    public static void ResetNodesToDefaualt(List<Node> nodes)
+    public static void ResetNodesToDefaualt()
     {
-        for (int i = 0; i < nodes.Count; i++)
+        for (int i = 0; i < nodesToReset.Count; i++)
         {
-            nodes[i].Reset();
+            nodesToReset[i].Reset();
         }
-        nodes.Clear();
     }
 
     #region from practical earlier in the year
@@ -263,14 +258,13 @@ public static class Algorithms
 
     public static List<Node> ScoreAllAccessibleNodes(Node startNode)
     {
-        ResetNodesToDefaualt(nodesToReset);
+        ResetNodesToDefaualt();
 
         List<Node> closedList = new List<Node>();
         List<Node> openList = new List<Node>();
 
         startNode.onOpenList = true;
         openList.Add(startNode);
-        nodesToReset.Add(startNode);
 
         //score every single possible grid we can go to using a scoring system simlar to dijsktra but wiht no sorting
         while (openList.Count > 0)
@@ -298,7 +292,6 @@ public static class Algorithms
                         currentNode.neighbours[i].SetParent(currentNode);
                         currentNode.neighbours[i].onOpenList = true;
                         openList.Add(currentNode.neighbours[i]);
-                        nodesToReset.Add(currentNode.neighbours[i]);
                     }
                 }
             }

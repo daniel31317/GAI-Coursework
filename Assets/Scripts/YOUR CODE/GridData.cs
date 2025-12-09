@@ -133,4 +133,36 @@ public class GridData : MonoBehaviour
         return Data[(int)position.x, (int)position.y];
     }
 
+
+    public List<Node> GetNeighbouringNodesAt(Vector3 position)
+    {
+        if((int)position.x < 0 || (int)position.x > 99 || (int)position.y < 0 || (int)position.y > 99)
+        {
+            Debug.LogWarning("Trying to access a node out of range at x : " + position.x + ", y : " + position.y);
+            return null;
+        }
+
+        List<Node> neighbours = new List<Node>();   
+
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                if (i == 0 && j == 0)
+                {
+                    continue;
+                }
+
+                if ((int)position.x + i < 0 || (int)position.x + i > 99 || (int)position.y + j < 0 || (int)position.y + j > 99)
+                {
+                    continue;
+                }
+
+                neighbours.Add(Data[(int)position.x + i, (int)position.y + j]);
+            }
+        }
+
+        return neighbours;
+    }
+
 }
