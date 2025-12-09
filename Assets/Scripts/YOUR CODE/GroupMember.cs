@@ -36,20 +36,20 @@ public class GroupMember : SteeringBehaviour
         }
                     
         //divide by big number so they allys dont move but look the right way
-        if (atShootPosition)
-        {
-            desiredVelocity /= 10f;
-        }
-        else
+        if (!atShootPosition)
         {
             desiredVelocity += (Vector3)CalcualteSeperationForce();
             Vector2 avoid = Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
             desiredVelocity += (Vector3)avoid;
+            desiredVelocity.Normalize();
+            desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
+        }
+        else
+        {
+            desiredVelocity /= 10f;
         }
 
-        desiredVelocity.Normalize();
-
-        desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
+        
 
         //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
@@ -64,21 +64,19 @@ public class GroupMember : SteeringBehaviour
         EnemyAgent currentEnemyPosition = Algorithms.GetClosestEnemyInLos(transform.position);
         if (currentEnemyPosition != null)
         {
-            if (Vector3.SqrMagnitude(transform.position - currentEnemyPosition.transform.position) < Attack.AllyGunData.range * Attack.AllyGunData.range)
+            if (Vector3.SqrMagnitude(transform.position - currentEnemyPosition.transform.position) <= Attack.AllyGunData.range * Attack.AllyGunData.range)
             {
                 currentTargetPos = currentEnemyPosition.transform.position;
                 atShootPosition = true;
                 return;
             }
-            else
-            {
-                atShootPosition = false;
-            }
         }
+
+        atShootPosition = false;
 
         Transform leaderTransform = AllyManager.Instance.groupLeader.transform;
 
-        currentTargetPos = leaderTransform.position - (-leaderTransform.forward * 2);
+        currentTargetPos = leaderTransform.position;
 
     }
 

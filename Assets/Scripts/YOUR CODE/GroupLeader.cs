@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 
 public class GroupLeader : SteeringBehaviour
@@ -14,6 +15,7 @@ public class GroupLeader : SteeringBehaviour
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
+        Profiler.BeginSample("GroupLeader UpdateBehaviour");
         HandleAIPathfinding();
 
         Vector3 targetOffset = currentTargetPos - transform.position;
@@ -34,27 +36,22 @@ public class GroupLeader : SteeringBehaviour
         else
         {
             desiredVelocity = (clippedSpeed / distance) * targetOffset;
+            desiredVelocity.Normalize();
+            desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
         }
 
 
+        
         //divide by big number so they allys dont move but look the right way
-        if(atShootPosition)
+        if (atShootPosition)
         {
             desiredVelocity /= 10f;
         }
-        else
-        {
-            Vector2 avoid = Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
-            desiredVelocity += (Vector3)avoid;
-        }
-
-        desiredVelocity.Normalize();
-
-        desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
 
         //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
 
+        Profiler.EndSample();
         return steeringVelocity;
     }
 
@@ -66,21 +63,21 @@ public class GroupLeader : SteeringBehaviour
         EnemyAgent currentEnemyPosition = Algorithms.GetClosestEnemyInLos(transform.position);
         if (currentEnemyPosition != null)
         {
-            if (Vector3.SqrMagnitude(transform.position - currentEnemyPosition.transform.position) < Attack.AllyGunData.range * Attack.AllyGunData.range)
+            if (Vector3.SqrMagnitude(transform.position - currentEnemyPosition.transform.position) <= Attack.AllyGunData.range * Attack.AllyGunData.range)
             {
                 atShootPosition = true;
                 currentTargetPos = currentEnemyPosition.transform.position;
                 return;
             }
-            else if(currentPath != null)
+            else if(currentPath != null && atShootPosition)
             {
                 Node enemyNode = GridData.Instance.GetNodeAt(currentEnemyPosition.transform.position);
                 currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), enemyNode);
                 atShootPosition = false;
             }
         }
-
-        
+  
+        atShootPosition = false;
 
 
         if (currentPath == null)
@@ -137,6 +134,7 @@ public class GroupLeader : SteeringBehaviour
         currentTargetPos = currentPath[0].position;
         currentPathIndex = 0;
         atShootPosition = false;
+        
     }
 
 }

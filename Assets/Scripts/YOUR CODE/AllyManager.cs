@@ -84,7 +84,7 @@ public class AllyManager : MonoBehaviour
         }
 
 
-        if (!AnyVisibleEnemies() && !rolesAssigned)
+        if (!AnyVisibleEnemies() && !rolesAssigned && groupLeader.groupLeader.atShootPosition)
         {
             AssignRoles();
         }
@@ -101,7 +101,7 @@ public class AllyManager : MonoBehaviour
                     continue;
                 } 
                 if (Algorithms.IsPositionInLineOfSight((Vector2)m_agents[i].transform.position, (Vector2)GameData.Instance.enemies[j].transform.position))
-                {
+                {                
                     return true;
                 }
             }         

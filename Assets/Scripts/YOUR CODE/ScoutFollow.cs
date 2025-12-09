@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.UIElements;
 using static UnityEngine.Analytics.IAnalytic;
 using static UnityEngine.GraphicsBuffer;
@@ -18,6 +19,7 @@ public class ScoutFollow : SteeringBehaviour
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
+        Profiler.BeginSample("ScoutFollow UpdateBehaviour");
         Vector2 avoid = Vector2.zero;
         if (catchingUp)
         {
@@ -37,7 +39,7 @@ public class ScoutFollow : SteeringBehaviour
         desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
         //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
-
+        Profiler.EndSample();
         return steeringVelocity;
     }
 

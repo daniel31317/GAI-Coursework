@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 public class ScoutLeader : SteeringBehaviour
 {
@@ -20,6 +21,7 @@ public class ScoutLeader : SteeringBehaviour
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
+        Profiler.BeginSample("ScoutLeader UpdateBehaviour");
         HandleIfAllyNeedsNewNodeToPathfind();
 
         //get desired velocity to the point
@@ -41,6 +43,7 @@ public class ScoutLeader : SteeringBehaviour
         //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
 
+        Profiler.EndSample();
         return steeringVelocity;
     }
 
@@ -83,7 +86,7 @@ public class ScoutLeader : SteeringBehaviour
             IsThereACloserNode();
         }
 
-        if (currentPathIndex < currentPath.Count - 1)
+        if (currentPathIndex < currentPath.Count)
         {
             float distanceToCurrentNode = Vector3.SqrMagnitude(transform.position - currentTargetPos);
 
@@ -91,6 +94,10 @@ public class ScoutLeader : SteeringBehaviour
             {
                 //get new node
                 currentPathIndex++;
+                if(currentPathIndex == currentPath.Count)
+                {
+                    return;
+                }
                 currentTargetPos = Algorithms.GenerateNewTargetPosWithOffset(currentPath[currentPathIndex]);
                 previousTargetPositions.Add(currentTargetPos);
                 if (currentPathIndex >= 2)

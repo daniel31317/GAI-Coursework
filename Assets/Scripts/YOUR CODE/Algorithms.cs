@@ -328,6 +328,10 @@ public static class Algorithms
         List<Node> nodes = RayTrace(startPos, endPos);
         for (int i = 0; i < nodes.Count; i++)
         {
+            if(nodes[i] == null)
+            {
+                continue;
+            }
             if (nodes[i].terrain == Map.Terrain.Tree)
             {
                 return false;
