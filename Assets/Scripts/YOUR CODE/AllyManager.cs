@@ -168,35 +168,62 @@ public class AllyManager : MonoBehaviour
 
     private void HandleDodgingRockets()
     {
+        float dodgeRadius = Attack.RocketData.radius + 2;
+        float dodgeSqr = dodgeRadius * dodgeRadius;
         for (int i = 0; i < GameData.Instance.attacks.Count; i++)
         {
             Attack currentAttack = GameData.Instance.attacks[i];
-            if (currentAttack.Type != Attack.AttackType.Rocket && currentAttack.IsEnemy)
+  
+            if(!IsRocketValid(currentAttack))
             {
-                if(!IsRocketValid(currentAttack))
+                continue;
+            }
+
+
+            float xDiff = currentAttack.currentPosition.x - currentAttack.StartPosition.x;
+
+            //divide by zero checks
+            float m1 = 0;
+            float m2 = 0;
+            if (xDiff != 0)
+            {
+                m1 = (currentAttack.currentPosition.y - currentAttack.StartPosition.y) / xDiff;
+                if(m1 != 0)
                 {
-                    continue;
+                    m2 = -1 / m1;
                 }
+            }
 
-                float m1 = (currentAttack.StartPosition.y - currentAttack.currentPosition.y) / (currentAttack.StartPosition.x - currentAttack.currentPosition.x);
-                float c1 = currentAttack.StartPosition.y + (m1 * -currentAttack.StartPosition.x);
-                float m2 = -1 / m1;
 
-                for (int j = 0; j < m_agents.Count; j++)
+            float c1 = currentAttack.StartPosition.y - (m1 * currentAttack.StartPosition.x);
+            
+
+            for (int j = 0; j < m_agents.Count; j++)
+            {
+                float c2 = m_agents[j].transform.position.y - (m2 * m_agents[j].transform.position.x);
+                float gradientTotal = m2 - m1;
+                float cInterceptTotal = c1 - c2;
+                float xIntercept = cInterceptTotal / gradientTotal;
+                Vector3 intersectionPos = new Vector3(xIntercept, m1 * xIntercept + c1, 0f);
+
+
+                float distSqr = Vector3.SqrMagnitude(intersectionPos - m_agents[j].transform.position);
+
+                if (distSqr <= dodgeSqr)
                 {
-                    float c2 = m_agents[j].transform.position.y + (m1 * -m_agents[j].transform.position.x);
-                    float gradientTotal = m1 - m2;
-                    float cInterceptTotal = c1 - c2;
-                    float xIntercept = cInterceptTotal / gradientTotal;
-                    Vector3 intersectionPos = new Vector3(xIntercept, m1 * xIntercept + c1, 0f);
-
-                    if(Vector3.SqrMagnitude(intersectionPos - m_agents[j].transform.position) <= Attack.RocketData.radius * Attack.RocketData.radius)
+                    if (m_agents[j].agentRole == AllyAgentRole.FollowLeader)
                     {
-                        m_agents[j].followLeader.AdddodgeRocketForce(m_agents[j].transform.position - intersectionPos);
+                        m_agents[j].followLeader.AddDodgeRocketForce((intersectionPos - m_agents[j].transform.position));
+                    }
+                    else if (m_agents[j].agentRole == AllyAgentRole.GroupLeader)
+                    {
+                        m_agents[j].groupLeader.AddDodgeRocketForce((intersectionPos - m_agents[j].transform.position));
                     }
 
                 }
+
             }
+            
         }       
     }
 
@@ -206,6 +233,11 @@ public class AllyManager : MonoBehaviour
     private bool IsRocketValid(Attack currentAttack)
     {
         if (currentAttack.Type != Attack.AttackType.Rocket)
+        {
+            return false;
+        }
+
+        if (!currentAttack.IsEnemy)
         {
             return false;
         }

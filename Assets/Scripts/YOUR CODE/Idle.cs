@@ -70,7 +70,7 @@ public class Idle : SteeringBehaviour
             gradient = (pointAhead.y - pointToSide.y) / xStep;
 
             //calculate the y-intercept of the line 
-            c = pointAhead.y + (gradient * -pointAhead.x);
+            c = pointAhead.y - (gradient * pointAhead.x);
 
             //divde x step by 1000 to make the turning more gradual
             xStep /= 1000;

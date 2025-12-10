@@ -86,16 +86,20 @@ public class FollowLeader : SteeringBehaviour
             
         }
 
+
+        bool dodgeRocket = false;
+
         if (dodgeRocketForce != Vector3.zero)
         {
-            desiredVelocity += dodgeRocketForce * SteeringAgent.MaxCurrentSpeed;
+            dodgeRocket = true;
+            desiredVelocity = dodgeRocketForce * SteeringAgent.MaxCurrentSpeed;
             dodgeRocketForce = Vector3.zero;
         }
 
         desiredVelocity.Normalize();
         desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
 
-        if(atShootPosition)
+        if(atShootPosition && !dodgeRocket)
         {
             desiredVelocity /= 10f;
         }
@@ -167,9 +171,9 @@ public class FollowLeader : SteeringBehaviour
     }
 
 
-    public void AdddodgeRocketForce(Vector3 force)
+    public void AddDodgeRocketForce(Vector3 force)
     {
-        dodgeRocketForce += force;
+        dodgeRocketForce = -force;
     }
 
 }

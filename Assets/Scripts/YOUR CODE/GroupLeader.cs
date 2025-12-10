@@ -9,6 +9,7 @@ public class GroupLeader : SteeringBehaviour
 {
     private int currentPathIndex = 0;
     private Vector3 currentTargetPos = new Vector3();
+    private Vector3 dodgeRocketForce = new Vector3();
     private List<Node> currentPath = new List<Node>();
 
     public bool atShootPosition = false;
@@ -41,9 +42,18 @@ public class GroupLeader : SteeringBehaviour
         }
 
 
-        
+        bool dodgeRocket = false;
+
+        if (dodgeRocketForce != Vector3.zero)
+        {
+            dodgeRocket = true;
+            desiredVelocity = dodgeRocketForce * SteeringAgent.MaxCurrentSpeed;
+            dodgeRocketForce = Vector3.zero;
+        }
+
+
         //divide by big number so they allys dont move but look the right way
-        if (atShootPosition)
+        if (atShootPosition && !dodgeRocket)
         {
             desiredVelocity /= 10f;
         }
@@ -84,7 +94,7 @@ public class GroupLeader : SteeringBehaviour
         {
             return;
         }
-        else if (currentPath.Count == 0 && !atShootPosition)
+        else if ((currentPath.Count == 0 || currentPathIndex == currentPath.Count - 1) && !atShootPosition)
         {
             AllyManager.Instance.AssignRoles();
         }
@@ -141,4 +151,8 @@ public class GroupLeader : SteeringBehaviour
         
     }
 
+    public void AddDodgeRocketForce(Vector3 force)
+    {
+        dodgeRocketForce = -force;
+    }
 }
