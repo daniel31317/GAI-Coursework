@@ -11,26 +11,68 @@ using static UnityEngine.GraphicsBuffer;
 public class FollowLeader : SteeringBehaviour
 {
     private Vector3 currentTargetPos = new Vector3();
-    private Vector3 dodgeRocketForce = new Vector3();
+ 
+
     private List<Node> currentPath = new List<Node>();
     private int currentPathIndex = 0;
     public bool catchingUp { get; private set; } = false;
-    private AllyAgent leader;
+    public bool shouldAvoidAllies { get; private set; } = false;
+    
+    private Vector3 dodgeRocketForce = new Vector3();
 
     public bool atShootPosition = false;
     public bool canShoot { get; private set; } = false;
     private const float atShootPositionDelay = 0.5f;
     private float atShootPositionDelta = 0;
 
+
+    private AllyAgent leader;
+
     private AllyAgent allyAgent;
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
+        DecideToCatchUp();
+        
+        if (catchingUp)
+        {
+            HandleCatchingUpToScoutLeaderPathfinding();
+        }
+        else
+        {
+            HandleAttackingEnemy();
+
+            CalculateDesiredVelocity();
+        }
+
+
+        bool dodgeRocket = ShouldWeDodgeRocket();
+
+        if(dodgeRocket)
+        {
+            desiredVelocity = dodgeRocketForce;
+            dodgeRocketForce = Vector3.zero;
+        }
+
+        desiredVelocity.Normalize();
+        desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
+
+
+        HandleSlowingDownToShoot(dodgeRocket);
+
+        //calculate steering velocity
+        steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
+        return steeringVelocity;
+    }
+
+
+    //deciees if the scout follower needs to catch up to the scout leader
+    private void DecideToCatchUp()
+    {
         float distanceSqr = Vector3.SqrMagnitude(transform.position - leader.transform.position);
         bool isInLos = Algorithms.IsPositionInLineOfSight(transform.position, leader.transform.position);
 
-
-        if(!catchingUp)
+        if (!catchingUp)
         {
             if (distanceSqr >= 100 && !isInLos)
             {
@@ -41,87 +83,7 @@ public class FollowLeader : SteeringBehaviour
                 CatchUpToLeader();
             }
         }
-        
-
-        if (catchingUp)
-        {
-            HandleCatchingUpToScoutLeaderPathfinding();
-            desiredVelocity = currentTargetPos - transform.position;
-        }
-        else
-        {
-            HandleAttackingEnemy();
-
-            if(!atShootPosition)
-            {
-                // use of arrival https://www.red3d.com/cwr/papers/1999/gdc99steer.pdf
-                currentTargetPos = leader.transform.position - (leader.transform.up * 2);
-
-                Vector3 targetOffset = currentTargetPos - transform.position;
-
-                float distance = targetOffset.magnitude;
-
-                float rampedSpeed = SteeringAgent.MaxCurrentSpeed * (distance / 2f);
-
-                float clippedSpeed = Mathf.Min(rampedSpeed, SteeringAgent.MaxCurrentSpeed);
-
-                //get desired velocity to the point
-                if (distance == 0)
-                {
-                    desiredVelocity = Vector3.zero;
-                }
-                else
-                {
-                    desiredVelocity = (clippedSpeed / distance) * targetOffset;
-                }
-
-                desiredVelocity += (Vector3)Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
-                desiredVelocity += (Vector3)Algorithms.CalcualteSeperationForce(gameObject);
-
-                
-
-            }
-            else
-            {
-                desiredVelocity = currentTargetPos - transform.position;
-            }
-            
-        }
-
-
-        bool dodgeRocket = false;
-
-        if (dodgeRocketForce != Vector3.zero)
-        {
-            dodgeRocket = true;
-            desiredVelocity = dodgeRocketForce;
-            dodgeRocketForce = Vector3.zero;
-        }
-
-        desiredVelocity.Normalize();
-        desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
-
-        //divide by big number so they allys dont move but look the right way
-        if (atShootPosition && !dodgeRocket)
-        {
-            atShootPositionDelta += Time.deltaTime;
-            if (atShootPositionDelta >= atShootPositionDelay)
-            {
-                canShoot = true;
-            }
-            desiredVelocity /= 10f;
-        }
-        else
-        {
-            atShootPositionDelta = 0;
-            canShoot = false;
-        }
-
-        //calculate steering velocity
-        steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
-        return steeringVelocity;
     }
-
 
 
     //pathfind to leader scout if this scout has fallen too far behind
@@ -135,7 +97,7 @@ public class FollowLeader : SteeringBehaviour
     }
 
 
-
+    //finds if there is an enemy to attack then selects the appropriate attack type
     private void HandleAttackingEnemy()
     {
         EnemyAgent currentEnemyPosition = Algorithms.GetClosestEnemyInLos(transform.position);
@@ -159,6 +121,7 @@ public class FollowLeader : SteeringBehaviour
             }
         }
 
+        //if no enemy to attack we are not at shoot position
         atShootPosition = false;
     }
 
@@ -183,6 +146,82 @@ public class FollowLeader : SteeringBehaviour
                 }
             }
         }
+
+        desiredVelocity = currentTargetPos - transform.position;
+    }
+
+
+    //calculate the desired velocity taking into acoont seperation and obstacle avoidance
+    private void CalculateDesiredVelocity()
+    {
+
+        if(atShootPosition)
+        {
+            desiredVelocity = currentTargetPos - transform.position;
+            return;
+        }
+
+
+        // use of arrival https://www.red3d.com/cwr/papers/1999/gdc99steer.pdf
+        //this slows the agent as it gets closer to the target position by clipping the speed based on distance
+        currentTargetPos = leader.transform.position - (leader.transform.up * 2);
+
+        Vector3 targetOffset = currentTargetPos - transform.position;
+
+        float distance = targetOffset.magnitude;
+
+        float rampedSpeed = SteeringAgent.MaxCurrentSpeed * (distance / 2f);
+
+        float clippedSpeed = Mathf.Min(rampedSpeed, SteeringAgent.MaxCurrentSpeed);
+
+        //get desired velocity to the point
+        if (distance == 0)
+        {
+            desiredVelocity = Vector3.zero;
+        }
+        else
+        {
+            desiredVelocity = (clippedSpeed / distance) * targetOffset;
+        }
+
+        //add obstacle avoidance and seperation forces if we should do that
+        if(shouldAvoidAllies)
+        {
+            desiredVelocity += (Vector3)Algorithms.CalcualteSeperationForce(gameObject);
+        }
+        desiredVelocity += (Vector3)Algorithms.CalcualteObstacleAvoidanceForce(transform.position);
+    }
+
+
+    //if the dodge rocket force is not zero we need to dodge the rocket
+    private bool ShouldWeDodgeRocket()
+    {
+        if(dodgeRocketForce == Vector3.zero)
+        {
+            return false;
+        }
+        return true;
+    }
+
+
+    //if at shoot position slow down to be able to shoot
+    private void HandleSlowingDownToShoot(bool dodgeRocket)
+    {
+        //divide by 10 so the allys slow down but look the right way
+        if (atShootPosition && !dodgeRocket)
+        {
+            atShootPositionDelta += Time.deltaTime;
+            if (atShootPositionDelta >= atShootPositionDelay)
+            {
+                canShoot = true;
+            }
+            desiredVelocity /= 10f;
+        }
+        else
+        {
+            atShootPositionDelta = 0;
+            canShoot = false;
+        }
     }
 
 
@@ -201,6 +240,12 @@ public class FollowLeader : SteeringBehaviour
     public void SetAllyAgent(AllyAgent agent)
     {
         allyAgent = agent;
+    }
+
+
+    public void SetAvoidAllies(bool avoid)
+    {
+        shouldAvoidAllies = avoid;
     }
 
 }

@@ -65,6 +65,7 @@ public class AllyAgent : SteeringAgent
 			case AllyAgentRole.FollowLeader:
                 followLeader.enabled = true;
                 followLeader.SetLeader(leader);
+                followLeader.SetAvoidAllies(true);
                 break;
 			case AllyAgentRole.Idle:
 				idle.enabled = true;

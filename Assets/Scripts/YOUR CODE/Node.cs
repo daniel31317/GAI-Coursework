@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+//node class that stores all the information for a single node to be used for pathfinding
 public class Node : IComparable<Node>
 {
     public Vector2 position { get; private set; }
@@ -16,6 +18,7 @@ public class Node : IComparable<Node>
     public bool onOpenList = false;
     public bool onClosedList = false;
 
+    //heuristics
     public int f = 0;
     public int g = 0;
     public int h = 0;

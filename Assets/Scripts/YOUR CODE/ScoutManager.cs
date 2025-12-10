@@ -26,18 +26,26 @@ public class ScoutManager : ScriptableObject
     {
         followScout = newAgent;
         followScout.SwitchAgentRole(AllyAgentRole.FollowLeader, leadScout);
+        leadScout.scoutLeader.SetScoutFollower(followScout.followLeader);
+        followScout.followLeader.SetAvoidAllies(false);
     }
 
+
+    //gets the scout positions to check around based on a starting position
     private void ScoutPositionToCheck(Vector3 pos)
     {
+        //keeps track of the nodes to check
         List<Node> closedNodeList = new List<Node>();
 
         Node startNode = GridData.Instance.GetNodeAt(pos);
 
+        //score all accessible nodes from start node
         closedNodeList = Algorithms.ScoreAllAccessibleNodes(startNode);
 
+        //remove nodes without certain amount of neighbours so it tries to avoid spaces with mots of obstacles
         RemoveNodesWithoutCertainAmountOfNeighbours(closedNodeList);
 
+        //scort the list by to be furthest to closest
         SortNodeListByDescendingF(closedNodeList);
 
         //get points of interest and remove anthing within +/- 5 on x and y
@@ -68,27 +76,17 @@ public class ScoutManager : ScriptableObject
 
 
 
-    //sort list fro0m highest f score to smallest
+    //sort list from highest f score to smallest
     private void SortNodeListByDescendingF(List<Node> list)
     {
-
-        for (int i = 0; i < list.Count - 1; i++)
-        {
-            for (int j = 0; j < list.Count - 1 - i; j++)
-            {
-                if (list[j].f < list[j + 1].f)
-                {
-                    Node temp = list[j];
-                    list[j] = list[j + 1];
-                    list[j + 1] = temp;
-                }
-            }
-        }
+        //this sorts it by ascending order so we reverse it after
+        list.Sort();
+        list.Reverse();
     }
 
 
 
-
+    //returns the closest node for the lead scout to go to
     public Node GetClosestScoutNode(Vector3 pos)
     {
         if(nodesToScout.Count <= 0)
@@ -104,7 +102,7 @@ public class ScoutManager : ScriptableObject
 
         int currentIndex = 0;
 
-
+        //sort through all nodes to find closest
         for (int i = 1; i < nodesToScout.Count; i++)
         {
             float distance = Vector2.SqrMagnitude((nodesToScout[i].position + offsetVector) - agentPosition);

@@ -10,11 +10,12 @@ public class ScoutLeader : SteeringBehaviour
 
     private Vector3 currentTargetPos = new Vector3();
     private bool returningToBase = false;
-    private bool scoutCatchingUp = false;
 
     private Node currentClosestNode;
 
     private EnemyAgent closestEnemy;
+
+    private FollowLeader scoutFollower;
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
@@ -24,7 +25,7 @@ public class ScoutLeader : SteeringBehaviour
         desiredVelocity = Vector3.Normalize(currentTargetPos - transform.position) * SteeringAgent.MaxCurrentSpeed;      
 
         //if scout has fallen behind wait for it to catch up by it pathfinding
-        if (scoutCatchingUp)
+        if (scoutFollower.catchingUp)
         {
             desiredVelocity /= 10000f;
         }
@@ -37,8 +38,11 @@ public class ScoutLeader : SteeringBehaviour
 
     private void HandleIfAllyNeedsNewNodeToPathfind()
     {
+
+        //if we are not already returning to base
         if (!returningToBase)
         {
+            //if there is an enemy in line of sight then we pathfind back to base
             closestEnemy = Algorithms.GetClosestEnemyInLos(transform.position);
 
             if (closestEnemy != null)
@@ -51,8 +55,11 @@ public class ScoutLeader : SteeringBehaviour
         }
 
 
+        //if we dont have a path return unless we are meant to be returning in which we pathfind back to node
+        //more of a safety check just to make sure there are no errors
         if(currentPath == null)
         {
+
             if(returningToBase)
             {
                 currentClosestNode = GridData.Instance.GetNodeAt(AllyManager.Instance.currentBasePosition);
@@ -71,13 +78,18 @@ public class ScoutLeader : SteeringBehaviour
         }
         else if (!returningToBase)
         {
+            //check for a closer scout node and go to that now
             IsThereACloserNode();
         }
 
+        //while on the path
         if (currentPathIndex <= currentPath.Count)
         {
+           
             float distanceToCurrentNode = Vector3.SqrMagnitude(transform.position - currentTargetPos);
 
+
+            //if within distance of current node skip to the next one and if at the end of the path then we remove that scouted node
             if (distanceToCurrentNode < 1f)
             {
                 //get new node
@@ -94,11 +106,12 @@ public class ScoutLeader : SteeringBehaviour
                 }
             }
         }
+        //if we have reached then end of the path (first if statement ahs run out of path) and we were returning to base we must be at base so tell group to go attack
         else if (returningToBase)
         {
             AllyManager.Instance.FoundEnemyToAttack(closestEnemy);
         }
-        else
+        else //if we arent returning we must ahve reached a scout node so remove it
         {
             AllyManager.ScoutManager.RemoveScoutedNode(currentClosestNode);
         }
@@ -107,7 +120,7 @@ public class ScoutLeader : SteeringBehaviour
 
     private void PathfindToNewNode()
     {
-
+        //get path to nexrt node
         currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), currentClosestNode);
         //if we have a path
         if (currentPath != null && currentPath.Count > 1)
@@ -122,7 +135,7 @@ public class ScoutLeader : SteeringBehaviour
     }
 
 
-
+    //checks for a closer node and if so pathfinds to it
     private void IsThereACloserNode()
     {
         Node closestNode = AllyManager.ScoutManager.GetClosestScoutNode(transform.position);
@@ -133,7 +146,7 @@ public class ScoutLeader : SteeringBehaviour
         }
     }
 
-
+    //resets the scout so they dont attempt to go abck to their old path
     public void ResetScout()
     {
         currentPath = new List<Node>();
@@ -142,12 +155,16 @@ public class ScoutLeader : SteeringBehaviour
         currentTargetPos = new Vector3();
 
         returningToBase = false;
-        scoutCatchingUp = false;
 
         currentClosestNode = null;
 
         closestEnemy = null;
     }
 
+
+    public void SetScoutFollower(FollowLeader followLeader)
+    {
+        scoutFollower = followLeader;
+    }
 
 }

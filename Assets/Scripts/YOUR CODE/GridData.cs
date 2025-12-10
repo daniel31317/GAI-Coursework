@@ -6,6 +6,7 @@ public class GridData : MonoBehaviour
 {
     public static GridData Instance;
 
+    //stores all the grid nodes
     public Node[,] Data { get; private set; } = new Node[100, 100];
 
 
@@ -37,9 +38,10 @@ public class GridData : MonoBehaviour
                 InitialiseGridNode(Data[i, j], i, j);
             }
         }
-        
-        
-        for(int i = 0; i < Data.GetLength(0); i++)
+
+
+        //set all neighbours for each node
+        for (int i = 0; i < Data.GetLength(0); i++)
         {
             for(int j = 0; j < Data.GetLength(1); j++)
             {
@@ -47,16 +49,21 @@ public class GridData : MonoBehaviour
             }
         }
 
+        //after grid is initialised we can assign roles to allies and initialise scout positions
         AllyManager.Instance.AssignRoles();
         AllyManager.ScoutManager.InitialiseScoutPositions();
     }
 
+    //sot the position and terrain of a node
     private void InitialiseGridNode(Node node, int x, int y)
     {
         node.SetPosition(new Vector2(x, y));
         node.SetTerrain(GameData.Instance.Map.GetTerrainAt(x, y));
     }
 
+
+
+    //returns the neighbouring nodes of a given node
     private List<Node> GetNeighboursOfNode(int x, int y)
     {
         List<Node> nodes = new List<Node>();
@@ -88,25 +95,26 @@ public class GridData : MonoBehaviour
         }
 
 
-        //make sure neighbour is in map
+        //make sure neighbour is in map x wise
         if(i + x < 0 || i + x > 99)
         {
             return true;
         }
-        
-        
-        if(j + y < 0 || j + y > 99)
+
+        //make sure neighbour is in map y wise
+        if (j + y < 0 || j + y > 99)
         {
             return true;
         }
 
+        //if its a tree we dont add it as a neighbour since its unwalkable
         if (Data[x +  i, y + j].terrain == Map.Terrain.Tree)
         {
             return true;
         }
 
 
-
+        //must be walkable
         return false;
     }
 
@@ -132,6 +140,7 @@ public class GridData : MonoBehaviour
     }
 
 
+    //gets the neighbouring nodes of a given position regardless of the terrain
     public List<Node> GetNeighbouringNodesAt(Vector3 position)
     {
         if((int)position.x < 0 || (int)position.x > 99 || (int)position.y < 0 || (int)position.y > 99)
