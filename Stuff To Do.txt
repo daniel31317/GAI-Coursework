@@ -1,6 +1,4 @@
-Target multiple enemies then shoot
-
-Avoid and shootback rockets
+shootback rockets
 
 Add punches
 
