@@ -168,7 +168,7 @@ public class AllyManager : MonoBehaviour
 
     private void HandleDodgingRockets()
     {
-        float dodgeRadius = Attack.RocketData.radius + 2;
+        float dodgeRadius = Attack.RocketData.radius + 1;
         float dodgeSqr = dodgeRadius * dodgeRadius;
         for (int i = 0; i < GameData.Instance.attacks.Count; i++)
         {
