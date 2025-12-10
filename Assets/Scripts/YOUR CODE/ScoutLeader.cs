@@ -18,7 +18,6 @@ public class ScoutLeader : SteeringBehaviour
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
-        Profiler.BeginSample("ScoutLeader UpdateBehaviour");
         HandleIfAllyNeedsNewNodeToPathfind();
 
         //get desired velocity to the point
@@ -33,7 +32,6 @@ public class ScoutLeader : SteeringBehaviour
         //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
 
-        Profiler.EndSample();
         return steeringVelocity;
     }
 

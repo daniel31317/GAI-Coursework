@@ -90,6 +90,7 @@ public class AllyAgent : SteeringAgent
 		idle = GetComponent<Idle>();
 
         groupLeader.SetAllyAgent(this);
+        followLeader.SetAllyAgent(this);
     }
 
 

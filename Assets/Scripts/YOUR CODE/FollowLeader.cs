@@ -22,6 +22,8 @@ public class FollowLeader : SteeringBehaviour
     private const float atShootPositionDelay = 0.5f;
     private float atShootPositionDelta = 0;
 
+    private AllyAgent allyAgent;
+
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
         float distanceSqr = Vector3.SqrMagnitude(transform.position - leader.transform.position);
@@ -139,7 +141,16 @@ public class FollowLeader : SteeringBehaviour
         EnemyAgent currentEnemyPosition = Algorithms.GetClosestEnemyInLos(transform.position);
         if (currentEnemyPosition != null)
         {
-            if (Vector3.SqrMagnitude(transform.position - currentEnemyPosition.transform.position) <= Attack.AllyGunData.range * Attack.AllyGunData.range)
+            float distance = Vector3.SqrMagnitude(transform.position - currentEnemyPosition.transform.position);
+
+            if (distance <= Attack.MeleeData.range * Attack.MeleeData.range)
+            {
+                atShootPosition = true;
+                currentTargetPos = currentEnemyPosition.transform.position;
+                allyAgent.SetAttackType(Attack.AttackType.Melee);
+                return;
+            }
+            else if (distance <= Attack.AllyGunData.range * Attack.AllyGunData.range)
             {
                 currentTargetPos = currentEnemyPosition.transform.position;
                 atShootPosition = true;
@@ -184,6 +195,11 @@ public class FollowLeader : SteeringBehaviour
     public void AddDodgeRocketForce(Vector3 force)
     {
         dodgeRocketForce = -force;
+    }
+
+    public void SetAllyAgent(AllyAgent agent)
+    {
+        allyAgent = agent;
     }
 
 }
