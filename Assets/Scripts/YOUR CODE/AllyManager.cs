@@ -12,10 +12,7 @@ public class AllyManager : MonoBehaviour
 
     public static ScoutManager ScoutManager { get; private set; }
 
-    public const int viewDistance = 31;
-    public const int viewDistanceSqr = 961;
-
-    private bool rolesAssigned = false;
+    private bool scoutRolesAssigned = false;
 
     public Vector3 currentBasePosition { get; private set; }
     public AllyAgent groupLeader { get; private set; }
@@ -23,6 +20,7 @@ public class AllyManager : MonoBehaviour
 
     private void Awake()
     {
+        //create instance of itself and scout manager
         if (Instance == null)
         {
             Instance = this;
@@ -32,6 +30,7 @@ public class AllyManager : MonoBehaviour
 
     private void Start()
     {
+        //add all componets to ally agents
         for (int i = 0; i < GameData.Instance.allies.Count; i++)
         {
             m_agents.Add((AllyAgent)GameData.Instance.allies[i]);
@@ -40,6 +39,7 @@ public class AllyManager : MonoBehaviour
     }
 
 
+    //this is called when there are no known enemies and assigns one leader scout and one follower scout the rest go idle
     public void AssignRoles()
     {
         Vector3 positionTotal = Vector3.zero;
@@ -64,12 +64,13 @@ public class AllyManager : MonoBehaviour
 
         currentBasePosition = positionTotal / m_agents.Count;
 
-        rolesAssigned = true;
+        scoutRolesAssigned = true;
     }
 
 
     public void Update()
     {
+        //look for any dead agents and remove them from the list
         for (int i = 0; i < m_agents.Count; i++)
         {
             if (!m_agents[i].gameObject.activeSelf)
@@ -78,27 +79,32 @@ public class AllyManager : MonoBehaviour
             }
         }
 
+
+        //if the group leader is dead assign a new one
         if (groupLeader != null && !groupLeader.gameObject.activeSelf)
         {
             AssignNewGroupLeader();
         }
 
-
+        //dodge incoming rockets
         HandleDodgingRockets();
 
-
-        if (!AnyVisibleEnemies() && !rolesAssigned && groupLeader.groupLeader.atShootPosition)
+        //if there are no visible enemies and we are in group leader phase switch roles abck to scout
+        if (!AnyVisibleEnemies() && !scoutRolesAssigned && groupLeader.groupLeader.atShootPosition)
         {
             AssignRoles();
         }
     }
 
+
+    //loops through all agents and enemies to see if any are visible
     private bool AnyVisibleEnemies()
     {
         for (int i = 0; i < m_agents.Count; i++)
         {
             for (int j = 0; j < GameData.Instance.enemies.Count; j++)
             {
+                //if enemy is not active skip
                 if (!GameData.Instance.enemies[j].gameObject.activeSelf)
                 {
                     continue;
@@ -116,19 +122,25 @@ public class AllyManager : MonoBehaviour
 
     public void FoundEnemyToAttack(EnemyAgent enemyToAttack)
     {
-        rolesAssigned = false;
+        //unassign scout roles
+        scoutRolesAssigned = false;
 
+        //get enemy position and relevant node
         Vector3 enemyPosition = enemyToAttack.transform.position;
 
         Node enemyNode = GridData.Instance.GetNodeAt(enemyPosition);
 
+        //get path to them
         List<Node> currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(currentBasePosition), enemyNode);
 
+        //if no path found assign roles and return (mainly a safety check shouldn't really be called)
         if (currentPath == null)
         {
             AssignRoles();
+            return;
         }
 
+        //assign group leader and followers
         for (int i = 0; i < m_agents.Count; i++)
         {
             if (i == 0)
@@ -141,13 +153,11 @@ public class AllyManager : MonoBehaviour
             {
                 m_agents[i].SwitchAgentRole(AllyAgentRole.FollowLeader, groupLeader);
             }
-
-
         }
     }
 
 
-
+    //make new group leader the first agent in the list and assign followers the new leader
     public void AssignNewGroupLeader()
     {
         if (m_agents.Count > 0)
@@ -243,7 +253,7 @@ public class AllyManager : MonoBehaviour
 
 
 
-
+    //conditions to check if rocket is valid for dodging
     private bool IsRocketValid(Attack currentAttack)
     {
         if (currentAttack.Type != Attack.AttackType.Rocket)

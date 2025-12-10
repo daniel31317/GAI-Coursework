@@ -6,8 +6,8 @@ public class AllyAgent : SteeringAgent
 
 	public AllyAgentRole agentRole { get; private set; } = AllyAgentRole.GroupLeader;
 
-
-	public GroupLeader groupLeader { get; private set; }
+    //reference to all behaviours
+    public GroupLeader groupLeader { get; private set; }
 	public ScoutLeader scoutLeader { get; private set; }
 	public FollowLeader followLeader { get; private set; }
 	public Idle idle { get; private set; }
@@ -22,18 +22,17 @@ public class AllyAgent : SteeringAgent
 	{
 		base.CooperativeArbitration();
 
+        //if they are a group leader or follow leader and can shoot
         if ((agentRole == AllyAgentRole.GroupLeader && groupLeader.canShoot)
 			|| (agentRole == AllyAgentRole.FollowLeader && followLeader.canShoot))
 		{
 			AttackWith(attackType);
-			if(attackType == Attack.AttackType.Rocket)
+            //if we have attacked with rocket reset to gun so we only use one rocket per group
+            if (attackType == Attack.AttackType.Rocket && agentRole == AllyAgentRole.GroupLeader)
 			{
-				if (agentRole == AllyAgentRole.GroupLeader)
-				{
-					groupLeader.shootRocket = false;
-					groupLeader.atShootPosition = false;
-					attackType = Attack.AttackType.AllyGun;
-                }
+				groupLeader.shootRocket = false;
+				groupLeader.atShootPosition = false;
+				attackType = Attack.AttackType.AllyGun;
             }
         }
 	}
@@ -44,7 +43,9 @@ public class AllyAgent : SteeringAgent
 	}
 
 
-	public void SwitchAgentRole(AllyAgentRole role, AllyAgent leader)
+
+    //switches the role of the agent and enables/disables relevant behaviours
+    public void SwitchAgentRole(AllyAgentRole role, AllyAgent leader)
 	{
 		agentRole = role;
 
@@ -76,8 +77,8 @@ public class AllyAgent : SteeringAgent
 
 
 
-
-	public void AddAllComponents()
+    //adds all components to the game object and sets references
+    public void AddAllComponents()
 	{
         gameObject.AddComponent<GroupLeader>();
         gameObject.AddComponent<ScoutLeader>();

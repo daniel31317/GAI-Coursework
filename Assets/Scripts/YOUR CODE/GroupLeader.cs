@@ -148,7 +148,7 @@ public class GroupLeader : SteeringBehaviour
                 }
                 else
                 {
-                    currentTargetPos = GenerateNewTargetPosWithOffset(currentPath[currentPathIndex]);
+                    currentTargetPos = Algorithms.GenerateNewTargetPosWithOffset(currentPath[currentPathIndex]);
                 }
             }
         }
@@ -163,14 +163,6 @@ public class GroupLeader : SteeringBehaviour
         }
     }
 
-
-    private Vector3 GenerateNewTargetPosWithOffset(Node node)
-    {
-        Vector3 newTargetPos = new Vector3(node.position.x, node.position.y, 0f);
-        newTargetPos.x += UnityEngine.Random.Range(0f, 1f);
-        newTargetPos.y += UnityEngine.Random.Range(0f, 1f);
-        return newTargetPos;
-    }
 
 
     public void SetCurrentPath(List<Node> path)
