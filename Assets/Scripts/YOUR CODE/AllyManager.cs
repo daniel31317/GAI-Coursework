@@ -180,9 +180,14 @@ public class AllyManager : MonoBehaviour
             }
 
 
+            /*this code finds the straight line of the rocket attack 
+             * it then finds the perpendicular line from each agent to the rocket line
+             * it then gets where the two lines intersect
+             * and from there applies a force to doge if the intersection point is within a certain distance of the agent
+            */
             float xDiff = currentAttack.currentPosition.x - currentAttack.StartPosition.x;
 
-            //divide by zero checks
+            //divide by zero checks for gradient calculations
             float m1 = 0;
             float m2 = 0;
             if (xDiff != 0)
@@ -194,19 +199,28 @@ public class AllyManager : MonoBehaviour
                 }
             }
 
-
+            
             float c1 = currentAttack.StartPosition.y - (m1 * currentAttack.StartPosition.x);
             
 
             for (int j = 0; j < m_agents.Count; j++)
             {
                 float c2 = m_agents[j].transform.position.y - (m2 * m_agents[j].transform.position.x);
+
+                // y = m1x + c1
+
+                // y = m2x + c2
+
+                //m2x + c2 = m1x + c1
+
+                //x = (c1 - c2) / (m2 - m1)
+
                 float gradientTotal = m2 - m1;
                 float cInterceptTotal = c1 - c2;
                 float xIntercept = cInterceptTotal / gradientTotal;
                 Vector3 intersectionPos = new Vector3(xIntercept, m1 * xIntercept + c1, 0f);
 
-
+                //dodge if within radius
                 float distSqr = Vector3.SqrMagnitude(intersectionPos - m_agents[j].transform.position);
 
                 if (distSqr <= dodgeSqr)
