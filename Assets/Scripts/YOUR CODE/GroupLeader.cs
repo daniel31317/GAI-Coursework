@@ -47,10 +47,12 @@ public class GroupLeader : SteeringBehaviour
         if (dodgeRocketForce != Vector3.zero)
         {
             dodgeRocket = true;
-            desiredVelocity = dodgeRocketForce * SteeringAgent.MaxCurrentSpeed;
+            desiredVelocity = dodgeRocketForce;
             dodgeRocketForce = Vector3.zero;
         }
 
+        desiredVelocity.Normalize();
+        desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
 
         //divide by big number so they allys dont move but look the right way
         if (atShootPosition && !dodgeRocket)
@@ -83,6 +85,7 @@ public class GroupLeader : SteeringBehaviour
             {
                 Node enemyNode = GridData.Instance.GetNodeAt(currentEnemyPosition.transform.position);
                 currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), enemyNode);
+                currentPathIndex = 0;
                 atShootPosition = false;
             }
         }

@@ -92,7 +92,7 @@ public class FollowLeader : SteeringBehaviour
         if (dodgeRocketForce != Vector3.zero)
         {
             dodgeRocket = true;
-            desiredVelocity = dodgeRocketForce * SteeringAgent.MaxCurrentSpeed;
+            desiredVelocity = dodgeRocketForce;
             dodgeRocketForce = Vector3.zero;
         }
 
