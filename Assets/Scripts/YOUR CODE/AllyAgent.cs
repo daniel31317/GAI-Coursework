@@ -22,11 +22,19 @@ public class AllyAgent : SteeringAgent
 	{
 		base.CooperativeArbitration();
 
-        if ((agentRole == AllyAgentRole.GroupLeader && groupLeader.atShootPosition)
-			|| (agentRole == AllyAgentRole.FollowLeader && followLeader.atShootPosition))
+        if ((agentRole == AllyAgentRole.GroupLeader && groupLeader.canShoot)
+			|| (agentRole == AllyAgentRole.FollowLeader && followLeader.canShoot))
 		{
 			AttackWith(attackType);
-		}
+			if(attackType == Attack.AttackType.Rocket)
+			{
+				if (agentRole == AllyAgentRole.GroupLeader)
+				{
+					groupLeader.shootRocket = false;
+					attackType = Attack.AttackType.AllyGun;
+                }
+            }
+        }
 	}
 
 	protected override void UpdateDirection()
@@ -79,6 +87,15 @@ public class AllyAgent : SteeringAgent
 		scoutLeader = GetComponent<ScoutLeader>();
 		followLeader = GetComponent<FollowLeader>();
 		idle = GetComponent<Idle>();
+
+        groupLeader.SetAllyAgent(this);
+    }
+
+
+
+	public void SetAttackType(Attack.AttackType type)
+	{
+		attackType = type;
     }
 
 }

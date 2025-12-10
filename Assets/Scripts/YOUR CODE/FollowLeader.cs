@@ -15,10 +15,12 @@ public class FollowLeader : SteeringBehaviour
     private List<Node> currentPath = new List<Node>();
     private int currentPathIndex = 0;
     public bool catchingUp { get; private set; } = false;
-    public bool atShootPosition = false;
     private AllyAgent leader;
 
-
+    public bool atShootPosition = false;
+    public bool canShoot { get; private set; } = false;
+    private const float atShootPositionDelay = 0.5f;
+    private float atShootPositionDelta = 0;
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
@@ -99,9 +101,20 @@ public class FollowLeader : SteeringBehaviour
         desiredVelocity.Normalize();
         desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
 
-        if(atShootPosition && !dodgeRocket)
+        //divide by big number so they allys dont move but look the right way
+        if (atShootPosition && !dodgeRocket)
         {
+            atShootPositionDelta += Time.deltaTime;
+            if (atShootPositionDelta >= atShootPositionDelay)
+            {
+                canShoot = true;
+            }
             desiredVelocity /= 10f;
+        }
+        else
+        {
+            atShootPositionDelta = 0;
+            canShoot = false;
         }
 
         //calculate steering velocity
