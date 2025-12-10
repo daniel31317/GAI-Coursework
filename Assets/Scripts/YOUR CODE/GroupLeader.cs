@@ -13,11 +13,14 @@ public class GroupLeader : SteeringBehaviour
     private List<Node> currentPath = new List<Node>();
 
     public bool atShootPosition = false;
+    public bool lastAtShootPosition = false;
     public bool canShoot { get; private set; } = false;
     private const float atShootPositionDelay = 0.5f;
     private float atShootPositionDelta = 0;
 
     public bool shootRocket = false;
+    private const float shootRocketDelay = 7.5f;
+    private float shootRocketDelta = 0f;
 
     private AllyAgent allyAgent;
 
@@ -61,6 +64,9 @@ public class GroupLeader : SteeringBehaviour
         desiredVelocity.Normalize();
         desiredVelocity *= SteeringAgent.MaxCurrentSpeed;
 
+
+        HandleIfCanShootRocket();
+
         //divide by big number so they allys dont move but look the right way
         if (atShootPosition && !dodgeRocket)
         {
@@ -96,6 +102,7 @@ public class GroupLeader : SteeringBehaviour
             if (distance <= Attack.MeleeData.range * Attack.MeleeData.range)
             {
                 atShootPosition = true;
+                lastAtShootPosition = true;
                 currentTargetPos = currentEnemyPosition.transform.position;
                 allyAgent.SetAttackType(Attack.AttackType.Melee);
                 return;
@@ -103,6 +110,7 @@ public class GroupLeader : SteeringBehaviour
             else if (distance <= Attack.AllyGunData.range * Attack.AllyGunData.range)
             {
                 atShootPosition = true;
+                lastAtShootPosition = true;
                 currentTargetPos = currentEnemyPosition.transform.position;
                 allyAgent.SetAttackType(Attack.AttackType.AllyGun);
                 return;
@@ -110,26 +118,23 @@ public class GroupLeader : SteeringBehaviour
             else if (shootRocket && distance <= Attack.RocketData.range * Attack.RocketData.range && GameData.Instance.AllyRocketsAvailable > 0)
             {
                 atShootPosition = true;
+                lastAtShootPosition = true;
                 currentTargetPos = currentEnemyPosition.transform.position;
                 return;
             }
-            else if (currentPath != null && atShootPosition)
+            else if (atShootPosition)
             {
                 Node enemyNode = GridData.Instance.GetNodeAt(currentEnemyPosition.transform.position);
                 currentPath = Algorithms.AStar(GridData.Instance.GetNodeAt(transform.position), enemyNode);
                 currentPathIndex = 0;
                 atShootPosition = false;
+                currentTargetPos = Algorithms.GenerateNewTargetPosWithOffset(currentPath[currentPathIndex]);
             }
         }
   
         atShootPosition = false;
 
-
-        if (currentPath == null)
-        {
-            return;
-        }
-        else if ((currentPath.Count == 0 || currentPathIndex == currentPath.Count - 1) && !atShootPosition)
+        if (currentPath == null || currentPath.Count == 0 || currentPathIndex == currentPath.Count - 1 || atShootPosition != lastAtShootPosition)
         {
             AllyManager.Instance.AssignRoles();
         }
@@ -176,7 +181,6 @@ public class GroupLeader : SteeringBehaviour
         currentPathIndex = 0;
         atShootPosition = false;
         canShoot = false;
-        shootRocket = true;
         allyAgent.SetAttackType(Attack.AttackType.Rocket);
     }
 
@@ -189,5 +193,21 @@ public class GroupLeader : SteeringBehaviour
     public void SetAllyAgent(AllyAgent agent)
     {
         allyAgent = agent;
+    }
+
+
+    private void HandleIfCanShootRocket()
+    {
+        if(shootRocket)
+        {
+            return;
+        }
+
+        shootRocketDelta += Time.deltaTime;
+        if (shootRocketDelta >= shootRocketDelay)
+        {
+            shootRocket = true;
+            shootRocketDelta = 0f;
+        }
     }
 }

@@ -54,6 +54,7 @@ public class AllyAgent : SteeringAgent
         scoutLeader.enabled = false;
         idle.enabled = false;
 		groupLeader.atShootPosition = false;
+		groupLeader.lastAtShootPosition = false;
         followLeader.atShootPosition = false;
 
         switch (agentRole)

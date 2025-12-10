@@ -152,8 +152,9 @@ public class FollowLeader : SteeringBehaviour
             }
             else if (distance <= Attack.AllyGunData.range * Attack.AllyGunData.range)
             {
-                currentTargetPos = currentEnemyPosition.transform.position;
                 atShootPosition = true;
+                currentTargetPos = currentEnemyPosition.transform.position;
+                allyAgent.SetAttackType(Attack.AttackType.AllyGun);
                 return;
             }
         }
