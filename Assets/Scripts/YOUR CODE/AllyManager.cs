@@ -194,6 +194,7 @@ public class AllyManager : MonoBehaviour
              * it then finds the perpendicular line from each agent to the rocket line
              * it then gets where the two lines intersect
              * and from there applies a force to doge if the intersection point is within a certain distance of the agent
+             * https://www.youtube.com/watch?v=aA15QO4YD6U i used this video to help remind me of the raw maths
             */
             float xDiff = currentAttack.currentPosition.x - currentAttack.StartPosition.x;
 

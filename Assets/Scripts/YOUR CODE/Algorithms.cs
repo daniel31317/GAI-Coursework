@@ -11,6 +11,8 @@ public static class Algorithms
     private static List<Node> nodesToReset = new List<Node>();
 
     #region pathfinding
+
+    //from pseudocode in powerpoint on pathfinding
     public static List<Node> AStar(Node startNode, Node endNode)
     {
         //reset all nodes to default so they dont interfere with pathfinding
@@ -281,6 +283,7 @@ public static class Algorithms
 
 
     //scores all accessible nodes from a start node and returns them in a list
+    //kind of like dijkstra minus the sorting part
     public static List<Node> ScoreAllAccessibleNodes(Node startNode)
     {
         List<Node> closedList = new List<Node>();
@@ -450,6 +453,7 @@ public static class Algorithms
     #region steering behaviours
 
     //calculates a force to avoid obstacles based on nearby trees
+    //https://www.red3d.com/cwr/papers/1999/gdc99steer.pdf
     public static Vector2 CalcualteObstacleAvoidanceForce(Vector3 currentPosition)
     {
         Vector2 totalForce = Vector2.zero;
@@ -489,6 +493,7 @@ public static class Algorithms
 
 
     //returns a foce to seperate from nearby allied agents
+    //https://www.red3d.com/cwr/papers/1999/gdc99steer.pdf
     public static Vector2 CalcualteSeperationForce(GameObject currentAgent)
     {
         Vector2 totalForce = Vector2.zero;
