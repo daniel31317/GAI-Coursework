@@ -116,7 +116,6 @@ public class GridData : MonoBehaviour
     {
         if(x < 0 || x > 99 || y < 0 || y > 99)
         {
-            Debug.LogWarning("Trying to access a node out of range at x : " + x + ", y : " + y);
             return null;
         }
         return Data[x, y];
@@ -127,7 +126,6 @@ public class GridData : MonoBehaviour
     {
         if((int)position.x < 0 || (int)position.x > 99 || (int)position.y < 0 || (int)position.y > 99)
         {
-            Debug.LogWarning("Trying to access a node out of range at x : " + position.x + ", y : " + position.y);
             return null;
         }
         return Data[(int)position.x, (int)position.y];
@@ -138,7 +136,6 @@ public class GridData : MonoBehaviour
     {
         if((int)position.x < 0 || (int)position.x > 99 || (int)position.y < 0 || (int)position.y > 99)
         {
-            Debug.LogWarning("Trying to access a node out of range at x : " + position.x + ", y : " + position.y);
             return null;
         }
 

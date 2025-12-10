@@ -24,7 +24,6 @@ public class GroupLeader : SteeringBehaviour
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
-        Profiler.BeginSample("GroupLeader UpdateBehaviour");
         HandleAIPathfinding();
 
         Vector3 targetOffset = currentTargetPos - transform.position;
@@ -78,10 +77,9 @@ public class GroupLeader : SteeringBehaviour
             canShoot = false;
         }
 
-            //calculate steering velocity
-            steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
+        //calculate steering velocity
+        steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
 
-        Profiler.EndSample();
         return steeringVelocity;
     }
 
@@ -109,7 +107,7 @@ public class GroupLeader : SteeringBehaviour
                 allyAgent.SetAttackType(Attack.AttackType.AllyGun);
                 return;
             }
-            else if (shootRocket && distance <= Attack.RocketData.range * Attack.RocketData.range)
+            else if (shootRocket && distance <= Attack.RocketData.range * Attack.RocketData.range && GameData.Instance.AllyRocketsAvailable > 0)
             {
                 atShootPosition = true;
                 currentTargetPos = currentEnemyPosition.transform.position;

@@ -24,8 +24,6 @@ public class FollowLeader : SteeringBehaviour
 
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
-        Profiler.BeginSample("ScoutFollow UpdateBehaviour");
-
         float distanceSqr = Vector3.SqrMagnitude(transform.position - leader.transform.position);
         bool isInLos = Algorithms.IsPositionInLineOfSight(transform.position, leader.transform.position);
 
@@ -119,7 +117,6 @@ public class FollowLeader : SteeringBehaviour
 
         //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
-        Profiler.EndSample();
         return steeringVelocity;
     }
 

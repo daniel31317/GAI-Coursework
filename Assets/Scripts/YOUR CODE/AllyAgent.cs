@@ -31,6 +31,7 @@ public class AllyAgent : SteeringAgent
 				if (agentRole == AllyAgentRole.GroupLeader)
 				{
 					groupLeader.shootRocket = false;
+					groupLeader.atShootPosition = false;
 					attackType = Attack.AttackType.AllyGun;
                 }
             }
