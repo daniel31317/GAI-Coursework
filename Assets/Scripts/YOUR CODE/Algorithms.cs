@@ -412,8 +412,8 @@ public static class Algorithms
     public static Vector3 GenerateNewTargetPosWithOffset(Node node)
     {
         Vector3 newTargetPos = new Vector3(node.position.x, node.position.y, 0f);
-        newTargetPos.x += Random.Range(0f, 1f);
-        newTargetPos.y += Random.Range(0f, 1f);
+        newTargetPos.x += Random.Range(0.2f, 0.8f);
+        newTargetPos.y += Random.Range(0.2f, 0.8f);
         return newTargetPos;
     }
 

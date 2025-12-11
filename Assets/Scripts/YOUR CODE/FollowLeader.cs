@@ -25,6 +25,7 @@ public class FollowLeader : SteeringBehaviour
     private const float atShootPositionDelay = 0.5f;
     private float atShootPositionDelta = 0;
 
+    private Vector3 lastPosition = Vector3.zero;
 
     private AllyAgent leader;
 
@@ -146,8 +147,17 @@ public class FollowLeader : SteeringBehaviour
                 }
             }
         }
-
+        
+        
         desiredVelocity = currentTargetPos - transform.position;
+
+        if (lastPosition == transform.position)
+        {
+            desiredVelocity *= -1;
+        }
+
+        lastPosition = transform.position;
+
     }
 
 

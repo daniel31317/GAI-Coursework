@@ -17,6 +17,8 @@ public class ScoutLeader : SteeringBehaviour
 
     private FollowLeader scoutFollower;
 
+    private Vector3 lastPosition = Vector3.zero;
+
     public override Vector3 UpdateBehaviour(SteeringAgent steeringAgent)
     {
         HandleIfAllyNeedsNewNodeToPathfind();
@@ -27,8 +29,19 @@ public class ScoutLeader : SteeringBehaviour
         //if scout has fallen behind wait for it to catch up by it pathfinding
         if (scoutFollower.catchingUp)
         {
-            desiredVelocity /= 10000f;
+            desiredVelocity /= 10f;
         }
+
+        if (lastPosition == transform.position)
+        {
+            desiredVelocity *= -1;
+        }
+
+        lastPosition = transform.position;
+
+
+
+
 
         //calculate steering velocity
         steeringVelocity = desiredVelocity - steeringAgent.CurrentVelocity;
