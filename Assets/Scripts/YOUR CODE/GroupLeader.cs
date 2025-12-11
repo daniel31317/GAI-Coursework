@@ -168,13 +168,17 @@ public class GroupLeader : SteeringBehaviour
     //calcualtes the desired velocity using arrival
     private void CalculateDesiredVelocity()
     {
+
+
         Vector3 targetOffset = currentTargetPos - transform.position;
 
         //use of arrival - https://www.red3d.com/cwr/papers/1999/gdc99steer.pdf
 
+        float slowingDistance = 1.5f;
+
         float distance = targetOffset.magnitude;
 
-        float rampedSpeed = SteeringAgent.MaxCurrentSpeed * (distance / 1);
+        float rampedSpeed = SteeringAgent.MaxCurrentSpeed * (distance / slowingDistance);
 
         float clippedSpeed = Mathf.Min(rampedSpeed, SteeringAgent.MaxCurrentSpeed);
 
